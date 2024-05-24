@@ -23,14 +23,11 @@ Consideración: Corto y conciso.
 
 ## Problemas encontrados y soluciones
 
-|  #  | Problema                                                          | Solución                                                                                                                     |
-| :-: | :---------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
-|  1  | El programa no imprimía "Hola, mundo" desde la GPU.               | Añadir verificaciones de errores después de las llamadas importantes de CUDA.                                                |
-|  2  | Error "no kernel image is available for execution on the device". | Especificar la arquitectura correcta de la GPU (Kepler) utilizando la opción `-arch=sm_35` al compilar el código con `nvcc`. |
-
-## Setup Utilizado
-
--   Compilador: nvcc
+|  #  | Problema                                                          | Solución                                                                                                                                  |
+| :-: | :---------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
+|  1  | El programa no imprimía "Hola, mundo" desde la GPU.               | Añadir verificaciones de errores después de las llamadas importantes de CUDA.                                                             |
+|  2  | Error "no kernel image is available for execution on the device". | Especificar la arquitectura correcta de la GPU (Kepler) utilizando la opción `-arch=sm_35` al compilar el código con `nvcc`.              |
+|  3  | Error "hola_mundo.cu(10): error: expected a declaration".         | Utilizar backslash (\) en la definición de la macro. El compilador espera que se defina en una única linea pero eso afecta la legibilidad |
 
 ## Comandos de compilación y ejecución:
 
