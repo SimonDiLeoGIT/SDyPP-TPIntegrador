@@ -1,24 +1,24 @@
 #include <stdio.h>
 
+/* Macro para verificar errores de CUDA */
+#define gpuErrorCheck(call) \
+do { \
+    cudaError_t gpuErr = call; \
+    if (cudaSuccess != gpuErr) \
+    { \
+        printf("CUDA error at %s %d: %s\n", __FILE__, __LINE__, cudaGetErrorString(gpuErr)); \
+        exit(1); \
+    } \
+} while (0)
+
+/* Código que se ejecuta en la GPU */
 __global__ void helloFromGPU()
 {
   printf("Hola, mundo desde GPU!\n");
 }
 
-// Macro para verificar errores de CUDA
-#define gpuErrorCheck(call)
-do
-{
-  cudaError_t gpuErr = call;
-  if (cudaSuccess != gpuErr)
-  {
-    printf("CUDA error at %s %d: %s\n", __FILE__, __LINE__, cudaGetErrorString(gpuErr));
-    exit(1);
-  }
-} while (0)
 
-    int
-    main()
+int main()
 {
   printf("Iniciando programa...\n");
 
