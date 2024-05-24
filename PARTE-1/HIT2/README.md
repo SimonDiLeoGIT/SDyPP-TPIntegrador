@@ -21,12 +21,7 @@ Consideración: Corto y conciso.
 -   Versión de CUDA: 11.4
 -   Compilador de CUDA: nvcc
 
-## Problemas Encontrados y Soluciones
-
-<!-- -   Problema: El programa no imprimía "Hola, mundo" desde la GPU.
--   Solución: Añadir verificaciones de errores después de las llamadas importantes de CUDA.
--   Problema: Error "no kernel image is available for execution on the device".
--   Solución: Especificar la arquitectura correcta de la GPU (Kepler) utilizando la opción -arch=sm_35 al compilar el código con nvcc. -->
+## Problemas encontrados y soluciones
 
 |  #  | Problema                                                          | Solución                                                                                                                     |
 | :-: | :---------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
