@@ -14,6 +14,12 @@ Thrust es una biblioteca de programación paralela de alto nivel diseñada para 
 
 El primer ejemplo que se presenta en este sitio es un generador de 32 millones de números randoms.
 [Random Numbers](random_numbers.cu)
+
+- Compilación y ejecución:
+```sh
+nvcc -o random_number random_number.cu -std=c++11 -arch=sm_35
+./random_number
+```
 No es necesario instalar nada adicional ya que Thrust está incluido en el kit de herramientas de CUDA.
 Hemos hecho una pequeña modificación en el código para que devuelva los primeros diez elementos generados, y así comprobar que está funcionando.
 
