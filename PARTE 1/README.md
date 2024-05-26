@@ -83,3 +83,17 @@ Por otro lado, programar en CUDA "a pelo" puede requerir ajustes específicos pa
 Cuando se programa en CUDA "a pelo", los desarrolladores tienen un control total sobre cada aspecto del código. Esto significa que pueden ajustar y optimizar cada parte del programa para aprovechar al máximo el rendimiento de la GPU. Pueden utilizar técnicas avanzadas de paralelización, gestionar eficientemente la memoria y optimizar los algoritmos para lograr el mejor rendimiento posible en un escenario específico. Este nivel de control permite maximizar el rendimiento en situaciones donde cada ciclo de CPU cuenta.
 
 Por otro lado, Thrust y cccl están diseñados para proporcionar una solución general que funcione bien en una amplia variedad de casos de uso. Estas bibliotecas ofrecen abstracciones de alto nivel que simplifican el proceso de desarrollo y permiten a los desarrolladores escribir código de manera más rápida y fácil. Sin embargo, debido a esta abstracción, es posible que no ofrezcan el mismo nivel de optimización que se puede lograr al programar en CUDA "a pelo". Las optimizaciones específicas de la aplicación pueden requerir un conocimiento más profundo de la arquitectura de la GPU y pueden no ser aplicables a todas las situaciones.
+
+# Hit #4 - Introducción a HASH usando CUDA
+
+El cálculo de funciones de hashing es ampliamente utilizado en criptografía, existen múltiples algoritmos, algunos como md5 (1991) ya son considerados inseguros y otros como sha256 (2001-2002) aún resisten la evolución y los tiempos actuales. Estos algoritmos suelen ser calculados en GPU ya que una de sus características es que son “costosos” de calcular computacionalmente.
+En este punto, usted deberá escribir un programa que reciba un string por parámetro y calcule, utilizando la GPU, un md5 y devuelve el hash calculado por consola.
+Puede usar librerías disponibles para este fin. 
+Las encontrara preguntando por CUDA MD5.
+
+
+- Compilación y ejecución:
+```sh
+nvcc -o md5_hash md5_hash.cu -std=c++11 -arch=sm_35
+./md5_hash '<cadena>'
+```
