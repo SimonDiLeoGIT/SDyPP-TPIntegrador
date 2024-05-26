@@ -5,8 +5,6 @@ Como no hay forma de adivinar cuál es ese número, deberá utilizar la GPU para
 Como salida, debe mostrar el hash resultante y el número que utilizó para generarlo.
 
 
-
-
 - Compilación y ejecución:
 ```sh
 nvcc -o brute_md5 brute_md5.cu -std=c++11 -arch=sm_35
