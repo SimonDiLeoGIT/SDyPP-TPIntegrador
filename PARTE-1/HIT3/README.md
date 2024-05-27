@@ -28,8 +28,8 @@ El primer ejemplo que se presenta en este sitio es un generador de 32 millones d
 -   Compilación y ejecución:
 
 ```sh
-nvcc -o random_number random_number.cu -std=c++11 -arch=sm_35
-./random_number
+nvcc -o random_numbers random_numbers.cu -std=c++11 -arch=sm_35
+./random_numbers
 ```
 
 No es necesario instalar nada adicional ya que Thrust está incluido en el kit de herramientas de CUDA.
