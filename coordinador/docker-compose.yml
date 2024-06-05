@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+    redis:
+        container_name: redis
+        image: redis:alpine3.19
+        restart: always
+        ports:
+            - '6379:6379'
+        volumes:
+            - ./redis:/data
+        networks:
+            - blockchain-network
+
+    rabbitmq:
+        container_name: rabbit
+        image: rabbitmq:3.13-management
+        restart: always
+        hostname: 'rabbit'
+        volumes:
+            - ./rabbitmq/data:/var/lib/rabbitmq
+        ports:
+            - '15672:15672'
+        environment:
+            - RABBITMQ_DEFAULT_USER=admin
+            - RABBITMQ_DEFAULT_PASS=password
+        networks:
+            - blockchain-network
+
+    coordinador:
+        depends_on:
+            - rabbitmq
+            - redis
+        container_name: coordinator
+        image: coordinator:latest
+        ports:
+            - '5000:5000'
+        environment:
+            - RABBITMQ_HOST=rabbit
+            - RABBITMQ_USER=admin
+            - RABBITMQ_PASSWORD=password
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+        networks:
+            - blockchain-network
+networks:
+    blockchain-network:
