@@ -2,10 +2,11 @@ version: '3.8'
 services:
     redis:
         container_name: redis
-        image: redis:alpine3.19
+        image: redis/redis-stack:7.2.0-v10 # redis:alpine3.19
         restart: always
         ports:
             - '6379:6379'
+            - '8001:8001'
         volumes:
             - ./redis:/data
         networks:
