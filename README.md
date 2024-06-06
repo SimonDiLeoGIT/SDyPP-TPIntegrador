@@ -24,14 +24,18 @@ Para apoyar los desarrollos de la blockchain, usted utilizará servicios de un s
 
 El concepto básico de blockchain es bastante simple: una base de datos que mantiene una lista en continuo crecimiento de registros ordenados. Algo muy similar a un log de transacciones de una base de datos.
 
-![](image.png)
+![image](https://github.com/SimonDiLeoGIT/SDyPP-TPIntegrador/assets/117539520/91822796-9a0d-4a56-a893-56268c2aa71b)
 
 Como se puede observar en la imagen, existe un orden y una secuencialidad en las operaciones que se registran en una blockchain, haciendo que, si bien el contenido de cada bloque se puede generar de forma distribuida, su procesamiento debe ser centralizado.
 
 El objetivo de este proyecto, es presentar un prototipo de arquitectura que permita paralelizar y distribuir la generación de bloques (blockchain paralelizable), gráficamente sería algo así:
 
-![](image-1.png)
+![image](https://github.com/SimonDiLeoGIT/SDyPP-TPIntegrador/assets/117539520/533b08f5-608d-4d23-9cd9-564eb1bade40)
 
 La principal ventaja de esta arquitectura es que, si dos operaciones no son mutuamente excluyentes o secuenciales, pueden ser realizadas en paralelo.
 
 Para lograr esto, se propone utilizar herramientas vistas en la materia como RabbitMQ para el manejo de colas de los bloques a procesar, Redis como motor de base de datos para registrar los bloques y transacciones y CUDA para el cálculo criptográfico intensivo de hashes y resolución de desafíos. Por último, desarrollar un servidor (coordinador) para la comunicación entre todos las tareas.
+
+![blockchain](https://github.com/SimonDiLeoGIT/SDyPP-TPIntegrador/assets/117539520/c9a95aa0-e184-4efd-89c8-a6f1f4e23947)
+
+
