@@ -27,6 +27,8 @@ def build_block(transactions):
         last_block_hash = redis.zrange(
             'blockchain', -1, -1, withscores=True)
 
+        last_index = redis.zcount('blockchain', '-inf', '+inf')
+
         if (len(last_block_hash) == 0):
             # Si last_block = [] se crea el bloque genesis
             previous_hash = 0
@@ -39,14 +41,17 @@ def build_block(transactions):
 
         # TODO => Verificar si están todos los datos necesarios
         block = {
+            'index': last_index,
             'previous_hash': previous_hash,
             'data': transactions,
-            "timestamp": f"{datetime.now()}",
-            'hash': " ",  # Este valor se actualizará con el proceso de minería
+            "timestamp": f"{round(time.time())}",
+            'nonce': 0,  # Este valor lo calculan los mineros
+            # Este valor lo completarán los mineros con el siguiente cálculo md5(index+timestamp+data+previous_hash+nonce)
+            'hash': "",
         }
 
         new_block = Block(
-            block["data"], block["timestamp"], block["hash"], block["previous_hash"])
+            block["data"], block["timestamp"], block["hash"], block["previous_hash"], block["nonce"], block["index"])
 
         properties = pika.BasicProperties(
             delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE)
@@ -57,7 +62,7 @@ def build_block(transactions):
             body=json.dumps({"challengue": "000", "block": new_block.to_dict()}))
 
         print(
-            f"{datetime.now()}: Block[{block['previous_hash']}] created ...")
+            f"{datetime.now()}: Block {new_block.index} [{new_block.previous_hash}] created ...")
 
     else:
         print(f"{datetime.now()}: There is no transactions",
@@ -130,15 +135,18 @@ def validateBlock():
     block_hash = block["hash"]
     previous_hash = block["previous_hash"]
     data = block["data"]
+    index = block["index"]
+    nonce = block["nonce"]
 
     new_block = Block(
-        data, timestamp, block_hash, previous_hash)
+        block["data"], block["timestamp"], block["hash"], block["previous_hash"], block["nonce"], block["index"])
 
     # TODO => Validar el bloque
+    # Verificando el hash md5(index+timestamp+data+previous_hash+nonce)
 
     # TODO => Verificar si existe en redis. Si no existe almacenarlo. Si ya existe descarto está request, porque ya un minero completo la tarea antes
     # Guardo el indice del nuevo bloque en el sorted set
     redis.zadd('blockchain', {new_block.hash: time.time()})
     # Guardo el bloque en la blockchain, asociandoló con el bloque anterior
     block_id = f"block:{new_block.previous_hash}"
-    redis.hset(block_id, mapping=block.to_dict())
+    redis.hset(block_id, mapping=new_block.to_dict())
