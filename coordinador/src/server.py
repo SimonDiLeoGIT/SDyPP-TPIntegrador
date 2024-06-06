@@ -37,7 +37,7 @@ def build_block(transactions):
         print(f"{datetime.now()}: Building transactions block...",
               file=sys.stdout, flush=True)
 
-        # TODO => Verificar si están todos los datos o faltan algunos
+        # TODO => Verificar si están todos los datos necesarios
         block = {
             'previous_hash': previous_hash,
             'data': transactions,
