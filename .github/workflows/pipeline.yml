@@ -100,7 +100,7 @@ jobs:
 
                   sleep 60
 
-                  kubectl apply -f deployments/rabbitmq.yml
+                  kubectl apply -f services/rabbitmq.yml
 
                   sleep 120
 
@@ -125,15 +125,15 @@ jobs:
                     RABBITMQ_HOST: rabbitmq.rabbitmq-namespace.svc.cluster.local
                   EOF
 
+            - name: Deploy Redis
+              working-directory: kubernetes
+              run: |
+                  # TODO: Instalar redis en cluster k8s
+
             - name: Create applications config
               working-directory: kubernetes
               run: |
                   kubectl apply -f config.yml
-
-            - name: Deploy Redis
-              working-directory: kubernetes
-              run: |
-                  # Instalar redis en cluster k8s
 
             - name: Deploy applications
               working-directory: kubernetes
