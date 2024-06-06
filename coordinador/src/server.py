@@ -45,8 +45,9 @@ def build_block(transactions):
             'previous_hash': previous_hash,
             'data': transactions,
             "timestamp": f"{round(time.time())}",
-            'nonce': 0,  # Este valor lo calculan los mineros
-            # Este valor lo completarán los mineros con el siguiente cálculo md5(index+timestamp+data+previous_hash+nonce)
+            # Este valor lo calculan los mineros
+            'nonce': 0,
+            # Este valor lo completarán los mineros una vez calcularon el nonce: md5(index+timestamp+data+previous_hash+nonce)
             'hash': "",
         }
 
@@ -142,7 +143,7 @@ def validateBlock():
         block["data"], block["timestamp"], block["hash"], block["previous_hash"], block["nonce"], block["index"])
 
     # TODO => Validar el bloque
-    # Verificando el hash md5(index+timestamp+data+previous_hash+nonce)
+    # Recalcular el hash md5(index+timestamp+data+previous_hash+nonce) que calcularon los mineros para ver si es válido
 
     # TODO => Verificar si existe en redis. Si no existe almacenarlo. Si ya existe descarto está request, porque ya un minero completo la tarea antes
     # Guardo el indice del nuevo bloque en el sorted set
