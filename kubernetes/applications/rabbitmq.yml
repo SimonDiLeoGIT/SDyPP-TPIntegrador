@@ -1,0 +1,10 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+    name: rabbitmq
+    namespace: rabbitmq-namespace
+spec:
+    image: rabbitmq:3.12-management # rabbitmq:3.13-management
+    service:
+        type: LoadBalancer
+    replicas: 3
