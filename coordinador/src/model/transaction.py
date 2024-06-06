@@ -19,13 +19,3 @@ class Transaction:
             'signature': self.signature,
             'timestamp': self.timestamp
         }
-
-    def to_string(self):
-        return jsonify({
-            'id': self.id,
-            'sender': self.sender,
-            'receiver': self.receiver,
-            'amount': self.amount,
-            'signature': self.signature,
-            'timestamp': self.timestamp
-        })
