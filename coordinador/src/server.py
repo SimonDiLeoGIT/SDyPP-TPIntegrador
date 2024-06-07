@@ -5,7 +5,7 @@ import sys
 import time
 import logging
 from redis import exceptions as redis_exceptions
-from rabbitmq import exceptions as rabbitmq_exceptions
+from pika import exceptions as rabbitmq_exceptions
 from flask import Flask, jsonify, request
 from datetime import datetime
 from model.transaction import Transaction
@@ -66,9 +66,9 @@ def build_block(transactions):
 
             print(
                 f"{datetime.now()}: Block {new_block.index} [{new_block.previous_hash}] created ...")
-        except redis_exceptions as error:
+        except redis_exceptions.RedisError as error:
             print(f"Redis error: {error}")
-        except rabbitmq_exceptions as error:
+        except rabbitmq_exceptions.AMQPError as error:
             print(f"RabbitMQ error: {error}")
         except Exception as e:
             print(f"Unexpected error: {e}")
@@ -90,7 +90,7 @@ def process_transactions():
             else:
                 build_block(transactions)
                 break
-    except rabbitmq_exceptions as error:
+    except rabbitmq_exceptions.AMQPError as error:
         print(f"RabbitMQ error: {error}")
     except Exception as e:
         print(f"Unexpected error: {e}")
@@ -139,13 +139,13 @@ def registerTransaction():
             "status": "200",
             "description": "Transaction registered successfully"
         })
-    except redis_exceptions as error:
+    except redis_exceptions.RedisError as error:
         print(f"Redis error: {error}")
         return jsonify({
             "status": "500",
             "description": "Internal server error"
         })
-    except rabbitmq_exceptions as error:
+    except rabbitmq_exceptions.AMQPError as error:
         print(f"RabbitMQ error: {error}")
         return jsonify({
             "status": "500",
@@ -190,7 +190,7 @@ def validateBlock():
             "block_data": new_block.to_dict()
         })
 
-    except redis_exceptions as error:
+    except redis_exceptions.RedisError as error:
         print(f"Redis error: {error}")
         return jsonify({
             "status": "500",
