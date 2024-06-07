@@ -5,15 +5,18 @@ import redis.exceptions
 
 
 def redis_connect():
-    redis_port = os.environ.get('REDIS_PORT')
     redis_host = os.environ.get('REDIS_HOST')
-    redis_password = os.environ.get('REDIS_PASSWORD') # TODO => Si está seteada la variable, utilizar password en la conexión y sino no utilizar
-    print(redis_password)
+    redis_port = os.environ.get('REDIS_PORT')
+    redis_password = os.environ.get('REDIS_PASSWORD')
 
     def connect():
         try:
-            connection = redis.Redis(
-                host=redis_host, port=redis_port, decode_responses=True)
+            if (redis_password):
+                connection = redis.Redis(
+                    host=redis_host, port=redis_port, decode_responses=True, password=redis_password)
+            else:
+                connection = redis.Redis(
+                    host=redis_host, port=redis_port, decode_responses=True)
 
             return connection
         except redis.exceptions.ConnectionError:
