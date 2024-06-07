@@ -4,6 +4,7 @@ import json
 import sys
 import time
 import logging
+import os
 from redis import exceptions as redis_exceptions
 from pika import exceptions as rabbitmq_exceptions
 from flask import Flask, jsonify, request
@@ -17,6 +18,7 @@ from plugins.scheduler import start_cronjob
 app = Flask(__name__)
 # logging.basicConfig(level=logging.DEBUG)
 
+hash_challengue = os.environ.get("HASH_CHALLENGUE")
 
 # Variables globales para mantener las conexiones
 rabbitmq = rabbit_connect()
@@ -24,6 +26,7 @@ redis = redis_connect()
 
 
 def build_block(transactions):
+
     if (len(transactions) > 0):
         try:
             # Obtengo el id del último bloque de la blockchain
@@ -49,7 +52,7 @@ def build_block(transactions):
                 "timestamp": f"{round(time.time())}",
                 # Este valor lo calculan los mineros
                 'nonce': 0,
-                # Este valor lo completarán los mineros una vez calcularon el nonce: md5(index+timestamp+data+previous_hash+nonce)
+                # Este valor lo completarán los mineros una vez calcularon el nonce: md5(nonce + (index+timestamp+data+previous_hash))
                 'hash': "",
             }
 
@@ -62,16 +65,16 @@ def build_block(transactions):
             rabbitmq.basic_publish(
                 exchange='workers', routing_key='block',
                 properties=properties,
-                body=json.dumps({"challengue": "000", "block": new_block.to_dict()}))
+                body=json.dumps({"challengue": str(hash_challengue), "block": new_block.to_dict()}))
 
             print(
                 f"{datetime.now()}: Block {new_block.index} [{new_block.previous_hash}] created ...")
         except redis_exceptions.RedisError as error:
-            print(f"Redis error: {error}")
+            print(f"Redis error: {error}", file=sys.stderr, flush=True)
         except rabbitmq_exceptions.AMQPError as error:
-            print(f"RabbitMQ error: {error}")
+            print(f"RabbitMQ error: {error}", file=sys.stderr, flush=True)
         except Exception as e:
-            print(f"Unexpected error: {e}")
+            print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
 
     else:
         print(f"{datetime.now()}: There is no transactions",
@@ -91,9 +94,9 @@ def process_transactions():
                 build_block(transactions)
                 break
     except rabbitmq_exceptions.AMQPError as error:
-        print(f"RabbitMQ error: {error}")
+        print(f"RabbitMQ error: {error}", file=sys.stderr, flush=True)
     except Exception as e:
-        print(f"Unexpected error: {e}")
+        print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
 
 
 # Inicia el cronjob para crear bloques
@@ -140,19 +143,19 @@ def registerTransaction():
             "description": "Transaction registered successfully"
         })
     except redis_exceptions.RedisError as error:
-        print(f"Redis error: {error}")
+        print(f"Redis error: {error}", file=sys.stderr, flush=True)
         return jsonify({
             "status": "500",
             "description": "Internal server error"
         })
     except rabbitmq_exceptions.AMQPError as error:
-        print(f"RabbitMQ error: {error}")
+        print(f"RabbitMQ error: {error}", file=sys.stderr, flush=True)
         return jsonify({
             "status": "500",
             "description": "Internal server error"
         })
     except Exception as e:
-        print(f"Unexpected error: {e}")
+        print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
         return jsonify({
             "status": "500",
             "description": "Internal server error"
@@ -175,7 +178,7 @@ def validateBlock():
             data, timestamp, block_hash, previous_hash, nonce, index)
 
         # TODO => Validar el bloque
-        # Recalcular el hash md5(index+timestamp+data+previous_hash+nonce) que calcularon los mineros para ver si es válido
+        new_block.validate()
 
         # TODO => Verificar si existe en redis. Si no existe almacenarlo. Si ya existe descarto está request, porque ya un minero completo la tarea antes
         # Guardo el indice del nuevo bloque en el sorted set
@@ -191,13 +194,13 @@ def validateBlock():
         })
 
     except redis_exceptions.RedisError as error:
-        print(f"Redis error: {error}")
+        print(f"Redis error: {error}", file=sys.stderr, flush=True)
         return jsonify({
             "status": "500",
             "description": "Internal server error"
         })
     except Exception as e:
-        print(f"Unexpected error: {e}")
+        print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
         return jsonify({
             "status": "500",
             "description": "Internal server error"

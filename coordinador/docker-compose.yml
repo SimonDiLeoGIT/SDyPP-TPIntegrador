@@ -41,6 +41,7 @@ services:
             - RABBITMQ_PASSWORD=password
             - REDIS_HOST=redis
             - REDIS_PORT=6379
+            - HASH_CHALLENGUE=0000
         networks:
             - blockchain-network
 networks:

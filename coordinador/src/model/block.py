@@ -1,4 +1,7 @@
 import json
+import sys
+import os
+from hashlib import md5
 
 
 class Block:
@@ -19,3 +22,25 @@ class Block:
             'hash': self.hash,
             "nonce": self.nonce,
         }
+
+        # Recalcular el hash md5(nonce + md5(index+timestamp+data+previous_hash)) que calcularon los mineros para ver si es válido
+    def validate(self):
+        hash_challengue = os.environ.get("HASH_CHALLENGUE")
+        if (not self.hash.startswith(hash_challengue)):
+            return False
+
+        data_as_string = ''.join(
+            [json.dumps(obj) for obj in self.data])
+
+        block_content = data_as_string + str(self.index).strip() + \
+            str(self.previous_hash).strip() + str(self.timestamp).strip()
+
+        nonce_bytes = str(self.nonce).strip().encode("utf-8")
+        block_content_bytes = block_content.encode("utf-8")
+
+        recalculated_block_hash = md5(
+            nonce_bytes + block_content_bytes).hexdigest()
+
+        print(recalculated_block_hash, file=sys.stdout, flush=True)
+
+        return recalculated_block_hash == self.hash
