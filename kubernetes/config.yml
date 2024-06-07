@@ -4,27 +4,4 @@ metadata:
     name: application-config
     namespace: applications-namespace
 data:
-    SPLIT_SERVICE_URL: http://split-service:5000/api/split
-    FRAGMENTS_COUNT: '5' # 5
-    BUCKET_NAME: sobel
-    REDIS_PORT: '6379'
-    REDIS_HOST: redis-master.redis-namespace.svc.cluster.local
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-    name: redis-master
-    namespace: redis-namespace
-data:
-    redis.conf: |
-        appendonly no
-        protected-mode no
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-    name: redis-replica
-    namespace: redis-namespace
-data:
-    redis.conf: |+
-        replicaof redis-master 6379
+    HASH_CHALLENGUE: '0000'

@@ -18,6 +18,42 @@ spec:
                   image: 'fedesin31/coordinator:latest'
                   ports:
                       - containerPort: 5000
+                  env:
+                      - name: REDIS_HOST
+                         valueFrom:
+                            configMapKeyRef:
+                                name: redis-config
+                                key: REDIS_HOST
+                      - name: REDIS_PORT
+                        valueFrom:
+                            configMapKeyRef:
+                                name: redis-config
+                                key: REDIS_PORT
+                      - name: REDIS_PASSWORD
+                        valueFrom:
+                            configMapKeyRef:
+                                name: redis-config
+                                key: REDIS_PASSWORD
+                      - name: RABBITMQ_HOST
+                        valueFrom:
+                            configMapKeyRef:
+                                name: rabbit-config
+                                key: RABBITMQ_HOST
+                      - name: RABBITMQ_USER
+                        valueFrom:
+                            configMapKeyRef:
+                                name: rabbit-config
+                                key: RABBITMQ_USER
+                      - name: RABBITMQ_PASSWORD
+                        valueFrom:
+                            configMapKeyRef:
+                                name: rabbit-config
+                                key: RABBITMQ_PASSWORD
+                      - name: HASH_CHALLENGUE
+                        valueFrom:
+                            configMapKeyRef:
+                                name: application-config
+                                key: HASH_CHALLENGUE
             # Agrega toleration para asegurar que los pods se creen unicamente en el node group de aplicaciones
             tolerations:
                 - key: instance_type

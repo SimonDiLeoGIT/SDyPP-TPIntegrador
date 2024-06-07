@@ -128,7 +128,27 @@ jobs:
             - name: Deploy Redis
               working-directory: kubernetes
               run: |
-                  # TODO: Instalar redis en cluster k8s
+                  helm repo add bitnami https://charts.bitnami.com/bitnami
+                  helm install redis bitnami/redis --version 19.5.2 --set namespaceOverride="redis-namespace"
+                  sleep 30
+
+            - name: Create Redis config
+              working-directory: kubernetes
+              run: |
+                  REDIS_PASSWORD=$(kubectl get secret --namespace redis-namespace redis -o jsonpath="{.data.redis-password}" | base64 -d)
+
+                  # Crear un nuevo ConfigMap con las credenciales de Redis
+                  cat <<EOF | kubectl apply -f -
+                  apiVersion: v1
+                  kind: ConfigMap
+                  metadata:
+                    name: redis-config
+                    namespace: applications-namespace
+                  data:
+                    REDIS_PASSWORD: $REDIS_PASSWORD
+                    REDIS_HOST: redis-master-0.redis-namespace.svc.cluster.local
+                    REDIS_PORT: '6379'
+                  EOF
 
             - name: Create applications config
               working-directory: kubernetes
