@@ -15,12 +15,12 @@ spec:
         spec:
             containers:
                 - name: coordinator
-                  image: 'fedesin31/coordinator:latest'
+                  image: 'simondileogit/coordinator:latest'
                   ports:
                       - containerPort: 5000
                   env:
                       - name: REDIS_HOST
-                         valueFrom:
+                        valueFrom:
                             configMapKeyRef:
                                 name: redis-config
                                 key: REDIS_HOST
