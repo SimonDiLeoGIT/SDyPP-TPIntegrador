@@ -24,6 +24,39 @@ jobs:
                   push: true
                   tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-coordinator:latest
 
+    configure-backend:
+        name: Configure backend for terraform state
+        if: startsWith(github.event.head_commit.message, '(up)')
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4.1.6
+
+            - name: GCP authentication
+              uses: google-github-actions/auth@v2
+              with:
+                  credentials_json: ${{ secrets.GOOGLE_CLOUD_CREDENTIALS }}
+
+            - name: Check and Create GCS Bucket for Terraform state
+              env:
+                  BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+                  PROJECT_ID: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
+              run: |
+                  gcloud config set project $PROJECT_ID
+
+                  echo '${{ secrets.GOOGLE_CLOUD_CREDENTIALS }}' > credentials.json
+                  gcloud auth activate-service-account --key-file=credentials.json
+                  gcloud config set pass_credentials_to_gsutil true
+
+                  # Check if the bucket exists
+                  BUCKET_URI="gs://${BUCKET_NAME}/"
+                  if gsutil ls -p $PROJECT_ID | grep $BUCKET_URI; then
+                    echo "Bucket $BUCKET_NAME already exists."
+                  else
+                    echo "Creating bucket $BUCKET_NAME..."
+                    gsutil mb -p $PROJECT_ID $BUCKET_URI
+                  fi
+
     infra-up:
         name: Build Kubernetes infrastructure
         if: startsWith(github.event.head_commit.message, '(up)')
@@ -46,8 +79,7 @@ jobs:
 
                   ls -lah
 
-                  BUCKET_NAME="blockchain_terraform"
-                  PREFIX="cluster/state"
+                  PREFIX="terraform"
 
                   terraform init --reconfigure \
                     --backend-config "bucket=${BUCKET_NAME}" \
@@ -183,8 +215,7 @@ jobs:
 
                   ls -lah
 
-                  BUCKET_NAME="blockchain_terraform"
-                  PREFIX="cluster/state"
+                  PREFIX="terraform"
 
                   terraform init --reconfigure \
                     --backend-config "bucket=${BUCKET_NAME}" \
