@@ -4,4 +4,4 @@ metadata:
     name: application-config
     namespace: applications-namespace
 data:
-    HASH_CHALLENGUE: '0000'
+    HASH_CHALLENGE: '0000'

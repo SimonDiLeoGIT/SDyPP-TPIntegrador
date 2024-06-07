@@ -18,7 +18,7 @@ from plugins.scheduler import start_cronjob
 app = Flask(__name__)
 # logging.basicConfig(level=logging.DEBUG)
 
-hash_challengue = os.environ.get("HASH_CHALLENGUE")
+hash_challenge = os.environ.get("HASH_CHALLENGE")
 
 # Variables globales para mantener las conexiones
 rabbitmq = rabbit_connect()
@@ -65,7 +65,7 @@ def build_block(transactions):
             rabbitmq.basic_publish(
                 exchange='workers', routing_key='block',
                 properties=properties,
-                body=json.dumps({"challengue": str(hash_challengue), "block": new_block.to_dict()}))
+                body=json.dumps({"challengue": str(hash_challenge), "block": new_block.to_dict()}))
 
             print(
                 f"{datetime.now()}: Block {new_block.index} [{new_block.previous_hash}] created ...")

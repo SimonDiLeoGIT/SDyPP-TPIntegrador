@@ -49,11 +49,11 @@ spec:
                             configMapKeyRef:
                                 name: rabbit-config
                                 key: RABBITMQ_PASSWORD
-                      - name: HASH_CHALLENGUE
+                      - name: HASH_CHALLENGE
                         valueFrom:
                             configMapKeyRef:
                                 name: application-config
-                                key: HASH_CHALLENGUE
+                                key: HASH_CHALLENGE
             # Agrega toleration para asegurar que los pods se creen unicamente en el node group de aplicaciones
             tolerations:
                 - key: instance_type
