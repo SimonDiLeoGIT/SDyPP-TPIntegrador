@@ -61,6 +61,8 @@ jobs:
         name: Build Kubernetes infrastructure
         if: startsWith(github.event.head_commit.message, '(up)')
         runs-on: ubuntu-latest
+        env:
+            BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -197,6 +199,8 @@ jobs:
         name: Destroy Kubernetes infrastructure
         if: startsWith(github.event.head_commit.message, '(down)')
         runs-on: ubuntu-latest
+        env:
+            BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
