@@ -21,6 +21,7 @@ services:
             - ./rabbitmq/data:/var/lib/rabbitmq
         ports:
             - '15672:15672'
+            - '5672:5672'
         environment:
             - RABBITMQ_DEFAULT_USER=admin
             - RABBITMQ_DEFAULT_PASS=password
@@ -34,14 +35,14 @@ services:
         container_name: coordinator
         image: coordinator:latest
         ports:
-            - '5000:5000'
+            - '5001:5000'
         environment:
             - RABBITMQ_HOST=rabbit
             - RABBITMQ_USER=admin
             - RABBITMQ_PASSWORD=password
             - REDIS_HOST=redis
             - REDIS_PORT=6379
-            - REDIS_PASSWORD=mysecretpassword
+            - REDIS_PASSWORD=
             - HASH_CHALLENGE=0000
         networks:
             - blockchain-network

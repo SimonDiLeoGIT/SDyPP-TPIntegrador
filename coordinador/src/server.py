@@ -65,7 +65,7 @@ def build_block(transactions):
             rabbitmq.basic_publish(
                 exchange='workers', routing_key='block',
                 properties=properties,
-                body=json.dumps({"challengue": str(hash_challenge), "block": new_block.to_dict()}))
+                body=json.dumps({"challenge": str(hash_challenge), "block": new_block.to_dict()}))
 
             print(
                 f"{datetime.now()}: Block {new_block.index} [{new_block.previous_hash}] created ...")
@@ -119,12 +119,11 @@ def registerTransaction():
         sender = transaction["sender"]
         receiver = transaction["receiver"]
         amount = transaction["amount"]
-        signature = transaction["signature"]
         timestamp = f"{datetime.now()}"
         transaction_id = f"tx:{timestamp}:{sender}"
 
         new_transaction = Transaction(
-            transaction_id, sender, receiver, amount, signature, timestamp)
+            transaction_id, sender, receiver, amount, timestamp)
 
         # Publico la transacción en la cola de rabbit.
         properties = pika.BasicProperties(
