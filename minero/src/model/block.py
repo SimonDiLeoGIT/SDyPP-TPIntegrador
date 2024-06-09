@@ -6,7 +6,7 @@ class Block:
         self.timestamp = timestamp
         self.hash = hash
         self.previous_hash = previous_hash
-        self.data = json.dumps(data)
+        self.data = data
         self.index = index
         self.nonce = nonce
 
@@ -21,11 +21,8 @@ class Block:
         }
 
     def get_block_content_as_string(self):
-        # data_as_string = ''.join(
-        #     [json.dumps(obj) for obj in self.data])
         serialized_objects = [json.dumps(obj) for obj in self.data]
 
-        # Une las cadenas JSON con comas y encierra en corchetes para formar una lista JSON válida
         data_as_string = '[' + ','.join(serialized_objects) + ']'
 
         block_content = data_as_string + str(self.index).strip() + \

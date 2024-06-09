@@ -9,7 +9,7 @@ class Block:
         self.timestamp = timestamp
         self.hash = hash
         self.previous_hash = previous_hash
-        self.data = json.dumps(data)
+        self.data = data
         self.index = index
         self.nonce = nonce
 
@@ -18,7 +18,7 @@ class Block:
             'index': self.index,
             'timestamp': self.timestamp,
             'previous_hash': self.previous_hash,
-            'data': self.data,
+            'data': json.dumps(self.data),
             'hash': self.hash,
             "nonce": self.nonce,
         }
