@@ -193,7 +193,7 @@ jobs:
               working-directory: kubernetes
               run: |
                   kubectl apply -f applications/coordinator.yml
-                  kubectl apply -f applications/join-service.yml
+                  kubectl apply -f applications/coordinator-service.yml
 
     infra-destroy:
         name: Destroy Kubernetes infrastructure
