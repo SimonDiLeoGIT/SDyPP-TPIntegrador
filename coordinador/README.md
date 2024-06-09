@@ -10,15 +10,7 @@ Nodo coordinador que será responsable de:
 
 ## Instrucciones
 
-1. Instalar dependencias
-
-```sh
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-2. Iniciar la aplicación
+1. Iniciar la aplicación
 
 ```sh
 # flask --app src/server.py run --host 0.0.0.0
