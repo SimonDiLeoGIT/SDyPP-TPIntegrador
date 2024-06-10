@@ -13,7 +13,6 @@ Nodo coordinador que será responsable de:
 1. Iniciar la aplicación
 
 ```sh
-# flask --app src/server.py run --host 0.0.0.0
 docker build -t coordinator:latest .
 docker-compose up
 ```
