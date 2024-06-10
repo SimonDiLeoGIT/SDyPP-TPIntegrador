@@ -33,8 +33,7 @@ class Block:
         # Une las cadenas JSON con comas y encierra en corchetes para formar una lista JSON válida
         data_as_string = '[' + ','.join(serialized_objects) + ']'
 
-        block_content = data_as_string + str(self.index).strip() + \
-            str(self.previous_hash).strip() + str(self.timestamp).strip()
+        block_content = f"{data_as_string}{str(self.index).strip()}{str(self.previous_hash).strip()}{str(self.timestamp).strip()}"
 
         nonce_bytes = str(self.nonce).strip().encode("utf-8")
         block_content_bytes = block_content.encode("utf-8")

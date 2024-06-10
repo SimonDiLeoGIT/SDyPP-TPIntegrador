@@ -25,7 +25,6 @@ class Block:
 
         data_as_string = '[' + ','.join(serialized_objects) + ']'
 
-        block_content = data_as_string + str(self.index).strip() + \
-            str(self.previous_hash).strip() + str(self.timestamp).strip()
+        block_content = f"{data_as_string}{str(self.index).strip()}{str(self.previous_hash).strip()}{str(self.timestamp).strip()}"
 
         return block_content
