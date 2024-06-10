@@ -15,7 +15,7 @@ spec:
         spec:
             containers:
                 - name: coordinator
-                  image: 'simondileogit/coordinator:latest'
+                  image: 'simondileogit/blockchain-coordinator:latest'
                   ports:
                       - containerPort: 5000
                   env:
