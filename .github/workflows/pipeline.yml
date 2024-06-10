@@ -219,7 +219,7 @@ jobs:
                     namespace: applications-namespace
                   data:
                     REDIS_PASSWORD: $REDIS_PASSWORD
-                    REDIS_HOST: redis-master-0.redis-namespace.svc.cluster.local
+                    REDIS_HOST: redis-master.redis-namespace.svc.cluster.local
                     REDIS_PORT: '6379'
                   EOF
 
