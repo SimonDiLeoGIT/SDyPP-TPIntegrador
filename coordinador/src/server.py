@@ -176,21 +176,29 @@ def validateBlock():
         new_block = Block(
             data, timestamp, block_hash, previous_hash, nonce, index)
 
-        # TODO => Validar el bloque
         new_block.validate()
 
-        # TODO => Verificar si existe en redis. Si no existe almacenarlo. Si ya existe descarto está request, porque ya un minero completo la tarea antes
-        # Guardo el indice del nuevo bloque en el sorted set
-        redis.zadd('blockchain', {new_block.hash: time.time()})
-        # Guardo el bloque en la blockchain, asociandoló con el bloque anterior
+        # Verifica si el bloque ya existe en redis
         block_id = f"block:{new_block.previous_hash}"
-        redis.hset(block_id, mapping=new_block.to_dict())
+        block_exists = redis.hexists(block_id, "hash")
+        print(f"Block already exists: {block_exists}")
+        if block_exists:
+            # Si ya existe descarto está request, porque ya un minero completo la tarea antes
+            return jsonify({
+                "status": "200",
+                "description": f"Block {new_block.index} already exists",
+            })
+        else:
+            # Guardo el hash del nuevo bloque en el sorted set
+            redis.zadd('blockchain', {new_block.hash: time.time()})
+            # Guardo el bloque en la blockchain, asociandoló con el bloque anterior
+            redis.hset(block_id, mapping=new_block.to_dict())
 
-        return jsonify({
-            "status": "200",
-            "description": f"Block {new_block.index} created",
-            "block_data": new_block.to_dict()
-        })
+            return jsonify({
+                "status": "200",
+                "description": f"Block {new_block.index} created",
+                "block_data": new_block.to_dict()
+            })
 
     except redis_exceptions.RedisError as error:
         print(f"Redis error: {error}", file=sys.stderr, flush=True)
