@@ -8,7 +8,8 @@ def check_for_nvidia_smi():
         if result.returncode == 0:
             print("Se encontró GPU NVIDIA")
             print(result.stdout.decode('utf-8'))
-            return True
+            # return True
+            return False  # Esto está así temporalmente para que no utilize la GPU, ya que por ahora no tenemos el minero cuda implementado
         else:
             print("No se encontró GPU NVIDIA")
             return False
