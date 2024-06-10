@@ -31,7 +31,7 @@ def build_block(transactions):
         try:
             # Obtengo el id del último bloque de la blockchain
             last_block_hash = redis.zrange(
-                'blockchain', -1, -1, withscores=True)
+                'block_hashes', -1, -1, withscores=True)
 
             if (len(last_block_hash) == 0):
                 # Si last_block = [] se crea el bloque genesis
@@ -39,7 +39,7 @@ def build_block(transactions):
                 last_index = 0
             else:
                 # Obtengo el último bloque de la blochain
-                last_index = redis.zcount('blockchain', '-inf', '+inf')
+                last_index = redis.zcount('block_hashes', '-inf', '+inf')
                 previous_hash = last_block_hash[0][0]
 
             print(f"{datetime.now()}: Building transactions block...",
@@ -190,7 +190,7 @@ def validateBlock():
             })
         else:
             # Guardo el hash del nuevo bloque en el sorted set
-            redis.zadd('blockchain', {new_block.hash: time.time()})
+            redis.zadd('block_hashes', {new_block.hash: time.time()})
             # Guardo el bloque en la blockchain, asociandoló con el bloque anterior
             redis.hset(block_id, mapping=new_block.to_dict())
 
