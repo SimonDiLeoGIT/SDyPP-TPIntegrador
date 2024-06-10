@@ -162,7 +162,7 @@ jobs:
                     kubectl apply -f services/rabbitmq.yml
 
                     echo "Waiting for RabbitMQ pods to be available..."
-                    while [[ $(kubectl get pods -n rabbitmq-namespace -l app.kubernetes.io/component=rabbitmq -o jsonpath='{.items[*].status.phase}') != "Running" ]]; do
+                    while [[ $(kubectl get pods -n rabbitmq-namespace -l app.kubernetes.io/component=rabbitmq -o jsonpath='{range .items[*]}{.status.phase}{"\n"}{end}' | sort | uniq) != "Running" ]]; do
                       echo "RabbitMQ pods are not ready yet. Waiting..."
                       sleep 10
                     done
