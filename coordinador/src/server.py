@@ -63,7 +63,7 @@ def build_block(transactions):
                 delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE)
 
             rabbitmq.basic_publish(
-                exchange='workers', routing_key='block',
+                exchange='workers', routing_key='',
                 properties=properties,
                 body=json.dumps({"challenge": str(hash_challenge), "block": new_block.to_dict()}))
 
@@ -181,7 +181,6 @@ def validateBlock():
         # Verifica si el bloque ya existe en redis
         block_id = f"block:{new_block.previous_hash}"
         block_exists = redis.hexists(block_id, "hash")
-        print(f"Block already exists: {block_exists}")
         if block_exists:
             # Si ya existe descarto está request, porque ya un minero completo la tarea antes
             return jsonify({
@@ -197,7 +196,6 @@ def validateBlock():
             return jsonify({
                 "status": "200",
                 "description": f"Block {new_block.index} created",
-                "block_data": new_block.to_dict()
             })
 
     except redis_exceptions.RedisError as error:

@@ -17,7 +17,7 @@ app = Flask(__name__)
 
 
 # Variables globales para mantener las conexiones
-rabbitmq = rabbit_connect()
+rabbitmq, queue_name = rabbit_connect()
 coordinator_url = os.environ.get("COORDINATOR_URL")
 
 
@@ -25,7 +25,7 @@ coordinator_url = os.environ.get("COORDINATOR_URL")
 def status():
     return jsonify({
         "status": "200",
-        "description": "Coordinator proccess is executing..."
+        "description": "PoW miner is running..."
     })
 
 
@@ -37,8 +37,6 @@ def consume_tasks():
             task = ast.literal_eval(body.decode("utf-8"))
             challenge = task["challenge"]
             block = task["block"]
-
-            print(f"Challengue: {challenge}", file=sys.stdout, flush=True)
             print(f"Block: {block}", file=sys.stdout, flush=True)
 
             block_hash = ""
@@ -76,14 +74,13 @@ def consume_tasks():
                     f"Failed to send data. Status code: {response.status_code}")
                 print(response.text)
 
-            ch.basic_ack(delivery_tag=method.delivery_tag)
         except rabbitmq_exceptions.AMQPError as error:
             print(f"RabbitMQ error: {error}", file=sys.stderr, flush=True)
         except Exception as e:
             print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
 
     rabbitmq.basic_consume(
-        queue='blocks', on_message_callback=callback,)
+        queue=queue_name, on_message_callback=callback, auto_ack=True)
     rabbitmq.start_consuming()
 
 

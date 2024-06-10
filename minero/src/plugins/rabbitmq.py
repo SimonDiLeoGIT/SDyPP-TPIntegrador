@@ -20,21 +20,19 @@ def rabbit_connect():
             )
             channel = connection.channel()
 
-            # Declaro queue para las transacciones
+            # Declaro exchange para las tasks de mineros
             channel.exchange_declare(
-                exchange='blockchain', exchange_type='direct', durable=True, auto_delete=False)
-            channel.queue_declare(queue='transactions', durable=True)
-            channel.queue_bind(
-                exchange='blockchain', queue='transactions', routing_key='tx')
+                exchange='workers', exchange_type='fanout', durable=True)
 
-            # Declaro queue para las tasks de mineros
-            channel.exchange_declare(
-                exchange='workers', exchange_type='topic', durable=True)
-            channel.queue_declare(queue='blocks', durable=True)
-            channel.queue_bind(
-                exchange='workers', queue='blocks', routing_key='block')
+            # Declara una cola temporal exclusiva
+            result = channel.queue_declare(queue='', exclusive=True)
+            queue_name = result.method.queue
 
-            return channel
+            # Vincula la cola al intercambio fanout
+            channel.queue_bind(exchange='workers', queue=queue_name)
+
+            # return channel
+            return channel, queue_name
         except pika.exceptions.AMQPConnectionError:
             return None
 
