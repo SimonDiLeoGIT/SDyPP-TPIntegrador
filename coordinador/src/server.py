@@ -73,6 +73,9 @@ def build_block(transactions):
             print(f"Redis error: {error}", file=sys.stderr, flush=True)
         except rabbitmq_exceptions.AMQPError as error:
             print(f"RabbitMQ error: {error}", file=sys.stderr, flush=True)
+            if "Stream connection lost" in error:
+                global rabbitmq
+                rabbitmq = rabbit_connect()
         except Exception as e:
             print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
 
@@ -95,6 +98,9 @@ def process_transactions():
                 break
     except rabbitmq_exceptions.AMQPError as error:
         print(f"RabbitMQ error: {error}", file=sys.stderr, flush=True)
+        if "Stream connection lost" in error:
+            global rabbitmq
+            rabbitmq = rabbit_connect()
     except Exception as e:
         print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
 
@@ -149,6 +155,9 @@ def registerTransaction():
         })
     except rabbitmq_exceptions.AMQPError as error:
         print(f"RabbitMQ error: {error}", file=sys.stderr, flush=True)
+        if "Stream connection lost" in error:
+            global rabbitmq
+            rabbitmq = rabbit_connect()
         return jsonify({
             "status": "500",
             "description": "Internal server error"
@@ -176,7 +185,14 @@ def validateBlock():
         new_block = Block(
             data, timestamp, block_hash, previous_hash, nonce, index)
 
-        new_block.validate()
+        block_is_valid = new_block.validate()
+
+        # Si el bloque no es valido, descarto.
+        if (not block_is_valid):
+            return jsonify({
+                "status": "400",
+                "description": f"The hash {new_block.hash} is not valid",
+            })
 
         # Verifica si el bloque ya existe en redis
         block_id = f"block:{new_block.previous_hash}"
@@ -187,16 +203,16 @@ def validateBlock():
                 "status": "200",
                 "description": f"Block {new_block.index} already exists",
             })
-        else:
-            # Guardo el hash del nuevo bloque en el sorted set
-            redis.zadd('block_hashes', {new_block.hash: time.time()})
-            # Guardo el bloque en la blockchain, asociandoló con el bloque anterior
-            redis.hset(block_id, mapping=new_block.to_dict())
 
-            return jsonify({
-                "status": "200",
-                "description": f"Block {new_block.index} created",
-            })
+        # Guardo el hash del nuevo bloque en el sorted set
+        redis.zadd('block_hashes', {new_block.hash: time.time()})
+        # Guardo el bloque en la blockchain, asociandoló con el bloque anterior
+        redis.hset(block_id, mapping=new_block.to_dict())
+
+        return jsonify({
+            "status": "200",
+            "description": f"Block {new_block.index} created",
+        })
 
     except redis_exceptions.RedisError as error:
         print(f"Redis error: {error}", file=sys.stderr, flush=True)
