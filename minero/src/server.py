@@ -96,9 +96,6 @@ def consume_tasks():
 
         except rabbitmq_exceptions.AMQPError as error:
             print(f"RabbitMQ error: {error}", file=sys.stderr, flush=True)
-            if "Stream connection lost" in error:
-                global rabbitmq
-                rabbitmq = rabbit_connect()
         except Exception as e:
             print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
 

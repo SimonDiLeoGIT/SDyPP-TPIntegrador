@@ -73,9 +73,6 @@ def build_block(transactions):
             print(f"Redis error: {error}", file=sys.stderr, flush=True)
         except rabbitmq_exceptions.AMQPError as error:
             print(f"RabbitMQ error: {error}", file=sys.stderr, flush=True)
-            if "Stream connection lost" in error:
-                global rabbitmq
-                rabbitmq = rabbit_connect()
         except Exception as e:
             print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
 
@@ -98,9 +95,6 @@ def process_transactions():
                 break
     except rabbitmq_exceptions.AMQPError as error:
         print(f"RabbitMQ error: {error}", file=sys.stderr, flush=True)
-        if "Stream connection lost" in error:
-            global rabbitmq
-            rabbitmq = rabbit_connect()
     except Exception as e:
         print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
 
@@ -155,9 +149,6 @@ def registerTransaction():
         })
     except rabbitmq_exceptions.AMQPError as error:
         print(f"RabbitMQ error: {error}", file=sys.stderr, flush=True)
-        if "Stream connection lost" in error:
-            global rabbitmq
-            rabbitmq = rabbit_connect()
         return jsonify({
             "status": "500",
             "description": "Internal server error"
