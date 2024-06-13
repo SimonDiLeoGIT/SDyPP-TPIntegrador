@@ -1,3 +1,4 @@
+import subprocess
 import ast
 import json
 import os
@@ -14,7 +15,6 @@ from utils.check_gpu import check_for_nvidia_smi
 from utils.find_nonce import find_nonce_with_prefix
 
 app = Flask(__name__)
-
 
 # Variables globales para mantener las conexiones
 rabbitmq, queue_name = rabbit_connect()
@@ -41,18 +41,44 @@ def consume_tasks():
 
             block_hash = ""
             nonce = 0
-
             block = Block(block["data"], block["timestamp"],
                           block_hash, block["previous_hash"], nonce, block["index"])
+            block_content = block.get_block_content_as_string()
 
             if gpu_available:
                 print("GPU available")
-                # TODO: Invocar al minero_cuda para que calcule el hash y el nonce
-                block_hash = challenge + "XXXXXXXX"
-                nonce = 23
+                current_dir = os.getcwd()
+
+                # Define relative paths
+                src_dir = os.path.join(current_dir, "src/utils/cuda")
+                src_file = "find_nonce_gpu.cu"
+                output_file = "find_nonce_gpu"
+                result_file = "output.json"
+
+                if not os.path.isdir(src_dir):
+                    return
+
+                # Create the full paths
+                src_path = os.path.join(src_dir, src_file)
+                output_path = os.path.join(src_dir, output_file)
+                result_path = os.path.join(src_dir, result_file)
+                result_path = os.path.join(current_dir, result_file)
+
+                if not os.path.isfile(output_path):
+                    # Call nvcc to compile the CUDA file if the output file does not exist
+                    subprocess.call(["nvcc", src_path, "-o", output_path])
+
+                block_content = block.get_block_content_as_string()
+                subprocess.call(
+                    [output_path, "1", "10000", challenge, block_content], stdout=subprocess.DEVNULL)
+
+                file = open(result_path, "r")
+                result = file.readlines()
+                result = ast.literal_eval(result[0])
+                block_hash = result["block_hash"]
+                nonce = result["nonce"]
             else:
                 print("GPU no available")
-                block_content = block.get_block_content_as_string()
                 nonce, block_hash = find_nonce_with_prefix(
                     challenge, block_content, 0, 1000000)
 
@@ -66,16 +92,13 @@ def consume_tasks():
             # Envía el bloque con los datos de hash y nonce al coordinador para que lo valide
             response = requests.post(
                 coordinator_url, json.dumps(block.to_dict()))
-            if response.status_code == 200:
-                response_json = response.json()
-                print(response_json)
-            else:
-                print(
-                    f"Failed to send data. Status code: {response.status_code}")
-                print(response.text)
+            print(response.text, file=sys.stdout, flush=True)
 
         except rabbitmq_exceptions.AMQPError as error:
             print(f"RabbitMQ error: {error}", file=sys.stderr, flush=True)
+            if "Stream connection lost" in error:
+                global rabbitmq
+                rabbitmq = rabbit_connect()
         except Exception as e:
             print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
 

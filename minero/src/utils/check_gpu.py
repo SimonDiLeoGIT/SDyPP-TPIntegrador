@@ -7,8 +7,7 @@ def check_for_nvidia_smi():
             ['nvidia-smi'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if result.returncode == 0:
             print(result.stdout.decode('utf-8'))
-            # return True
-            return False  # Esto está así temporalmente para que no utilize la GPU, ya que por ahora no tenemos el minero cuda implementado
+            return True
         else:
             return False
     except FileNotFoundError:

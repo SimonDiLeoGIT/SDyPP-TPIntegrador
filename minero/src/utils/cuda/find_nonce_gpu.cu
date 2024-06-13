@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
     int numero = atoi(remaining_chars);
 
     printf("Hash MD5 de '%d%s': %.32s\n", numero, input, hash_md5_result);
-    FILE *json_file = fopen("json_output.json", "w");
+    FILE *json_file = fopen("output.json", "w");
     fprintf(json_file, "{\"nonce\": %d, \"block_hash\": \"%s\"}", numero, hash_md5_result);
     
     cudaFree(d_input);
