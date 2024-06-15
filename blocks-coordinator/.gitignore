@@ -1,6 +1,4 @@
 .venv
 .history
-/redis/
-/rabbitmq/
 .env
 __pycache__

@@ -11,5 +11,4 @@ def check_for_nvidia_smi():
         else:
             return False
     except FileNotFoundError:
-        print("nvidia-smi no está instalado o no se encontró en el PATH.")
         return False

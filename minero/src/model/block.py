@@ -25,9 +25,8 @@ class Block:
         serialized_data = [json.dumps(obj) for obj in self.data]
         data_as_string = ''.join(serialized_data)
 
-        block_content = f"{str(self.index).strip()}{str(self.timestamp).strip()}{
-            data_as_string}{str(self.previous_hash).strip()}"
+        block_content = f"{str(self.index).strip()}{str(self.timestamp).strip()}{data_as_string}{str(self.previous_hash).strip()}"
 
-        block_content_hash = md5(block_content.encode("utf-8"))
+        block_content_hash = md5(block_content.encode("utf-8")).hexdigest()
 
         return block_content_hash

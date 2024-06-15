@@ -45,7 +45,10 @@ def consume_tasks():
                           block_hash, block["previous_hash"], nonce, block["index"])
 
             # Obtiene el hash del contenido del bloque que servirá como entrada al minero
-            block_content_hash = block.get_block_content_as_string()
+            block_content_hash = block.get_block_content_hash()
+
+            print(
+                f"block_content_hash: {block_content_hash}", file=sys.stdout, flush=True)
 
             if gpu_available:
                 print("GPU available")

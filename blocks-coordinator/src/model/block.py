@@ -29,17 +29,18 @@ class Block:
         if (not self.hash.startswith(hash_challenge)):
             return False
 
+        block_content_hash = md5(block_content.encode("utf-8")).hexdigest()
         serialized_data = [json.dumps(obj) for obj in self.data]
         data_as_string = ''.join(serialized_data)
-        
+
         block_content = f"{str(self.index).strip()}{str(self.timestamp).strip()}{data_as_string}{str(self.previous_hash).strip()}"
 
         # Calcula el hash del contenido del bloque
-        block_content_hash = md5(block_content)
+        block_content_hash = md5(block_content.encode("utf-8"))
 
         # Calcula el hash del bloque agregandole el hash antes
-        md5_input = f"{self.nonce.strip()}{block_content_hash}"
+        md5_input = f"{int(self.nonce)}{block_content_hash}"
         recalculated_block_hash = md5(md5_input.encode("utf-8")).hexdigest()
-        
+
         # Valida si el hash calculado por el minero (self.hash) es igual al hash calculado
         return recalculated_block_hash == self.hash

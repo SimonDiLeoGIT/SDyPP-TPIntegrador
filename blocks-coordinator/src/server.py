@@ -100,7 +100,7 @@ def process_transactions():
 
 
 # Inicia el cronjob para crear bloques
-start_cronjob(process_transactions, 60)
+start_cronjob(process_transactions, 30)
 
 
 @ app.route("/status")
@@ -172,6 +172,8 @@ def validateBlock():
         data = block["data"]
         index = block["index"]
         nonce = block["nonce"]
+
+        print(f"block_hash: {block_hash}", file=sys.stderr, flush=True)
 
         new_block = Block(
             data, timestamp, block_hash, previous_hash, nonce, index)
