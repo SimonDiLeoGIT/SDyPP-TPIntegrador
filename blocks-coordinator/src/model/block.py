@@ -29,7 +29,6 @@ class Block:
         if (not self.hash.startswith(hash_challenge)):
             return False
 
-        block_content_hash = md5(block_content.encode("utf-8")).hexdigest()
         serialized_data = [json.dumps(obj) for obj in self.data]
         data_as_string = ''.join(serialized_data)
 
