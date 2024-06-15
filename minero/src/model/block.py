@@ -1,4 +1,5 @@
 import json
+from hashlib import md5
 
 
 class Block:
@@ -20,11 +21,13 @@ class Block:
             "nonce": self.nonce,
         }
 
-    def get_block_content_as_string(self):
-        serialized_objects = [json.dumps(obj) for obj in self.data]
+    def get_block_content_hash(self):
+        serialized_data = [json.dumps(obj) for obj in self.data]
+        data_as_string = ''.join(serialized_data)
 
-        data_as_string = '[' + ','.join(serialized_objects) + ']'
+        block_content = f"{str(self.index).strip()}{str(self.timestamp).strip()}{
+            data_as_string}{str(self.previous_hash).strip()}"
 
-        block_content = f"{data_as_string}{str(self.index).strip()}{str(self.previous_hash).strip()}{str(self.timestamp).strip()}"
+        block_content_hash = md5(block_content.encode("utf-8"))
 
-        return block_content
+        return block_content_hash

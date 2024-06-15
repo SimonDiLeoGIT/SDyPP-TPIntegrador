@@ -21,8 +21,7 @@ RUN chown -R nonroot:nonroot /app
 USER nonroot
 
 # Instalar las dependencias de Python
-RUN pip install --upgrade pip setuptools && \
-    pip install -r requirements.txt
+RUN pip install -r requirements.txt
 
 EXPOSE 5000
 

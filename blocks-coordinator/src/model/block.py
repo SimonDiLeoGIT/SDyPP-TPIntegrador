@@ -29,18 +29,17 @@ class Block:
         if (not self.hash.startswith(hash_challenge)):
             return False
 
-        serialized_objects = [json.dumps(obj) for obj in self.data]
-        # Une las cadenas JSON con comas y encierra en corchetes para formar una lista JSON válida
-        data_as_string = '[' + ','.join(serialized_objects) + ']'
+        serialized_data = [json.dumps(obj) for obj in self.data]
+        data_as_string = ''.join(serialized_data)
+        
+        block_content = f"{str(self.index).strip()}{str(self.timestamp).strip()}{data_as_string}{str(self.previous_hash).strip()}"
 
-        block_content = f"{data_as_string}{str(self.index).strip()}{str(self.previous_hash).strip()}{str(self.timestamp).strip()}"
+        # Calcula el hash del contenido del bloque
+        block_content_hash = md5(block_content)
 
-        nonce_bytes = str(self.nonce).strip().encode("utf-8")
-        block_content_bytes = block_content.encode("utf-8")
-
-        recalculated_block_hash = md5(
-            nonce_bytes + block_content_bytes).hexdigest()
-
-        print(recalculated_block_hash, file=sys.stdout, flush=True)
-
+        # Calcula el hash del bloque agregandole el hash antes
+        md5_input = f"{self.nonce.strip()}{block_content_hash}"
+        recalculated_block_hash = md5(md5_input.encode("utf-8")).hexdigest()
+        
+        # Valida si el hash calculado por el minero (self.hash) es igual al hash calculado
         return recalculated_block_hash == self.hash

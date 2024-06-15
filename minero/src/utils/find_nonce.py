@@ -18,7 +18,7 @@ def find_nonce_with_prefix(target_hash_prefix, base_string, start_nonce, end_non
     """
     for nonce in range(start_nonce, end_nonce + 1):
         test_string = f"{nonce}{base_string}"
-        hash_result = hashlib.md5(test_string.encode()).hexdigest()
+        hash_result = hashlib.md5(test_string.encode("utf-8")).hexdigest()
         if hash_result.startswith(target_hash_prefix):
             return nonce, hash_result
     return None
@@ -33,14 +33,3 @@ def main(target_hash_prefix, base_string, start_nonce, end_nonce):
         return f"Nonce encontrado: {nonce}\nHash correspondiente: {hash_result}"
     else:
         return "No se encontró ningún nonce que cumpla con la condición en el rango proporcionado."
-
-
-# Ejemplo de uso
-if __name__ == "__main__":
-    target_hash_prefix = "0000"
-    base_string = "example"
-    start_nonce = 0
-    end_nonce = 1000000
-
-    result = main(target_hash_prefix, base_string, start_nonce, end_nonce)
-    print(result)

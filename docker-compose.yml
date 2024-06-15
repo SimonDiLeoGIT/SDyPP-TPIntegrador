@@ -32,8 +32,8 @@ services:
         depends_on:
             - rabbitmq
             - redis
-        container_name: coordinator
-        image: coordinator:latest
+        container_name: blocks-coordinator
+        image: blocks-coordinator:latest
         ports:
             - '5001:5000'
         environment:

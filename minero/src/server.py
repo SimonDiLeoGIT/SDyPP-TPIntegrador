@@ -1,15 +1,15 @@
-import subprocess
 import ast
 import json
 import os
+import subprocess
 import sys
 import threading
 import time
-import requests
 
+import requests
 from flask import Flask, jsonify
-from pika import exceptions as rabbitmq_exceptions
 from model.block import Block
+from pika import exceptions as rabbitmq_exceptions
 from plugins.rabbitmq import rabbit_connect
 from utils.check_gpu import check_for_nvidia_smi
 from utils.find_nonce import find_nonce_with_prefix
@@ -43,7 +43,9 @@ def consume_tasks():
             nonce = 0
             block = Block(block["data"], block["timestamp"],
                           block_hash, block["previous_hash"], nonce, block["index"])
-            block_content = block.get_block_content_as_string()
+
+            # Obtiene el hash del contenido del bloque que servirá como entrada al minero
+            block_content_hash = block.get_block_content_as_string()
 
             if gpu_available:
                 print("GPU available")
@@ -68,9 +70,8 @@ def consume_tasks():
                     # Call nvcc to compile the CUDA file if the output file does not exist
                     subprocess.call(["nvcc", src_path, "-o", output_path])
 
-                block_content = block.get_block_content_as_string()
                 subprocess.call(
-                    [output_path, "1", "10000", challenge, block_content], stdout=subprocess.DEVNULL)
+                    [output_path, "1", "10000", challenge, block_content_hash], stdout=subprocess.DEVNULL)
 
                 file = open(result_path, "r")
                 result = file.readlines()
@@ -80,7 +81,7 @@ def consume_tasks():
             else:
                 print("GPU no available")
                 nonce, block_hash = find_nonce_with_prefix(
-                    challenge, block_content, 0, 1000000)
+                    challenge, block_content_hash, 0, 1000000)
 
             print(f"block_hash: {block_hash}", file=sys.stdout, flush=True)
             print(f"nonce: {nonce}", file=sys.stdout, flush=True)
