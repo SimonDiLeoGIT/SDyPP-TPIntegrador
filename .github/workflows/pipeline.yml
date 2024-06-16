@@ -167,7 +167,9 @@ jobs:
                       sleep 10
                     done
                     
-                    kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy ".*sobel.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
+                    kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy ".*transactions.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
+                    kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy ".*blocks.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
+                    kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy ".*mining_tasks.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
                   fi
 
             - name: Create RabbitMQ config
@@ -243,6 +245,13 @@ jobs:
                       exit 1
                   fi
 
+                  BLOCKS_COORDINATOR_SERVICE_IP=$(kubectl get svc blocks-coordinator-service -n applications-namespace -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
+
+                  if [ -z "$BLOCKS_COORDINATOR_SERVICE_IP" ]; then
+                      echo "Failed to fetch backend IP"
+                      exit 1
+                  fi
+
                   get_dns_record_id() {
                     local record_name="$1"
                     local zone_id="$2"
@@ -261,6 +270,7 @@ jobs:
                   # Obtener dinámicamente los IDs de los registros A
                   RABBIT_DNS_RECORD_ID=$(get_dns_record_id "rabbit.inventomate.xyz" "$CLOUDFLARE_ZONE_ID" "$CLOUDFLARE_TOKEN")
                   POOL_MANAGER_RECORD_ID=$(get_dns_record_id "poolmanager.inventomate.xyz" "$CLOUDFLARE_ZONE_ID" "$CLOUDFLARE_TOKEN")
+                  BLOCKS_COORDINATOR_RECORD_ID=$(get_dns_record_id "coordinator.inventomate.xyz" "$CLOUDFLARE_ZONE_ID" "$CLOUDFLARE_TOKEN")
 
                   curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records/$RABBIT_DNS_RECORD_ID" \
                     -H "Authorization: Bearer $CLOUDFLARE_TOKEN" \
@@ -280,6 +290,17 @@ jobs:
                       "type": "A",
                       "name": "poolmanager.inventomate.xyz",
                       "content": "'"$POOL_MANAGER_SERVICE_IP"'",
+                      "ttl": 120,
+                      "proxied": false
+                    }'
+                    
+                  curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records/$BLOCKS_COORDINATOR_RECORD_ID" \
+                    -H "Authorization: Bearer $CLOUDFLARE_TOKEN" \
+                    -H "Content-Type: application/json" \
+                    --data '{
+                      "type": "A",
+                      "name": "coordinator.inventomate.xyz",
+                      "content": "'"$BLOCKS_COORDINATOR_SERVICE_IP"'",
                       "ttl": 120,
                       "proxied": false
                     }'
