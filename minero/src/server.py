@@ -18,7 +18,7 @@ app = Flask(__name__)
 
 # Variables globales para mantener las conexiones
 rabbitmq, queue_name = rabbit_connect()
-coordinator_url = os.environ.get("COORDINATOR_URL")
+coordinator_url = os.environ.get("BLOCKS_COORDINATOR_URL")
 
 
 @ app.route("/status")
@@ -34,10 +34,9 @@ def consume_tasks():
 
     def callback(ch, method, properties, body):
         try:
-            task = ast.literal_eval(body.decode("utf-8"))
+            task = json.loads(body)
             challenge = task["challenge"]
             block = task["block"]
-            print(f"Block: {block}", file=sys.stdout, flush=True)
 
             block_hash = ""
             nonce = 0
@@ -46,9 +45,6 @@ def consume_tasks():
 
             # Obtiene el hash del contenido del bloque que servirá como entrada al minero
             block_content_hash = block.get_block_content_hash()
-
-            print(
-                f"block_content_hash: {block_content_hash}", file=sys.stdout, flush=True)
 
             if gpu_available:
                 print("GPU available")
@@ -97,6 +93,7 @@ def consume_tasks():
             response = requests.post(
                 coordinator_url, json.dumps(block.to_dict()))
             print(response.text, file=sys.stdout, flush=True)
+            rabbitmq.basic_ack(method.delivery_tag)
 
         except rabbitmq_exceptions.AMQPError as error:
             print(f"RabbitMQ error: {error}", file=sys.stderr, flush=True)
@@ -104,7 +101,7 @@ def consume_tasks():
             print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
 
     rabbitmq.basic_consume(
-        queue=queue_name, on_message_callback=callback, auto_ack=True)
+        queue=queue_name, on_message_callback=callback)
     rabbitmq.start_consuming()
 
 

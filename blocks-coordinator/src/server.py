@@ -2,8 +2,6 @@ import ast
 import pika
 import json
 import sys
-import time
-import logging
 import os
 from redis import exceptions as redis_exceptions
 from pika import exceptions as rabbitmq_exceptions
@@ -49,7 +47,7 @@ def build_block(transactions):
                 'index': last_index,
                 'previous_hash': previous_hash,
                 'data': transactions,
-                "timestamp": f"{round(time.time())}",
+                "timestamp": f"{round(datetime.now().timestamp())}",
                 # Este valor lo calculan los mineros
                 'nonce': 0,
                 # Este valor lo completarán los mineros una vez calcularon el nonce: md5(nonce + (index+timestamp+data+previous_hash))
@@ -119,11 +117,11 @@ def registerTransaction():
         sender = transaction["sender"]
         receiver = transaction["receiver"]
         amount = transaction["amount"]
-        timestamp = f"{datetime.now()}"
-        transaction_id = f"tx:{timestamp}:{sender}"
+        timestamp = f"{round(datetime.now().timestamp())}"
+        transaction_id = f"transactions:{timestamp}:{sender}"
 
         new_transaction = Transaction(
-            transaction_id, sender, receiver, amount, timestamp)
+            f"{timestamp}:{sender}", sender, receiver, amount, timestamp)
 
         # Publico la transacción en la cola de rabbit.
         properties = pika.BasicProperties(
@@ -134,7 +132,7 @@ def registerTransaction():
             body=json.dumps(new_transaction.to_dict()))
 
         # Almacenar la transacción en redis.
-        redis.hset(new_transaction.id,
+        redis.hset(transaction_id,
                    mapping=new_transaction.to_dict())
 
         return jsonify({
@@ -173,8 +171,6 @@ def validateBlock():
         index = block["index"]
         nonce = block["nonce"]
 
-        print(f"block_hash: {block_hash}", file=sys.stderr, flush=True)
-
         new_block = Block(
             data, timestamp, block_hash, previous_hash, nonce, index)
 
@@ -188,7 +184,7 @@ def validateBlock():
             })
 
         # Verifica si el bloque ya existe en redis
-        block_id = f"block:{new_block.previous_hash}"
+        block_id = f"blockchain:{new_block.hash}"
         block_exists = redis.hexists(block_id, "hash")
         if block_exists:
             # Si ya existe descarto está request, porque ya un minero completo la tarea antes
@@ -198,7 +194,8 @@ def validateBlock():
             })
 
         # Guardo el hash del nuevo bloque en el sorted set
-        redis.zadd('block_hashes', {new_block.hash: time.time()})
+        redis.zadd('block_hashes', {
+                   new_block.hash: datetime.now().timestamp()})
         # Guardo el bloque en la blockchain, asociandoló con el bloque anterior
         redis.hset(block_id, mapping=new_block.to_dict())
 

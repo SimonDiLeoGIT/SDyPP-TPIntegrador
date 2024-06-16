@@ -1,4 +1,3 @@
-version: '3.8'
 services:
     redis:
         container_name: redis
@@ -8,7 +7,7 @@ services:
             - '6379:6379'
             - '8001:8001'
         volumes:
-            - ./redis:/data
+            - redis:/data
         networks:
             - blockchain-network
 
@@ -18,7 +17,7 @@ services:
         restart: always
         hostname: 'rabbit'
         volumes:
-            - ./rabbitmq/data:/var/lib/rabbitmq
+            - rabbitmq:/var/lib/rabbitmq
         ports:
             - '15672:15672'
             - '5672:5672'
@@ -28,7 +27,7 @@ services:
         networks:
             - blockchain-network
 
-    coordinador:
+    blocks-coordinator:
         depends_on:
             - rabbitmq
             - redis
@@ -48,3 +47,6 @@ services:
             - blockchain-network
 networks:
     blockchain-network:
+volumes:
+    redis:
+    rabbitmq:

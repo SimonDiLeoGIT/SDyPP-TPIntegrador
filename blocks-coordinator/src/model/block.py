@@ -35,7 +35,7 @@ class Block:
         block_content = f"{str(self.index).strip()}{str(self.timestamp).strip()}{data_as_string}{str(self.previous_hash).strip()}"
 
         # Calcula el hash del contenido del bloque
-        block_content_hash = md5(block_content.encode("utf-8"))
+        block_content_hash = md5(block_content.encode("utf-8")).hexdigest()
 
         # Calcula el hash del bloque agregandole el hash antes
         md5_input = f"{int(self.nonce)}{block_content_hash}"

@@ -17,12 +17,12 @@ jobs:
                   username: ${{ secrets.DOCKER_HUB_USERNAME }}
                   password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-            - name: Build and push coordinator service image
+            - name: Build and push blocks coordinator service image
               uses: docker/build-push-action@v5
               with:
-                  context: ./coordinador
+                  context: ./blocks-coordinator
                   push: true
-                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-coordinator:latest
+                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-blocks-coordinator:latest
 
     configure-backend:
         name: Configure backend for terraform state
@@ -231,8 +231,8 @@ jobs:
             - name: Deploy applications
               working-directory: kubernetes
               run: |
-                  kubectl apply -f applications/coordinator.yml
-                  kubectl apply -f applications/coordinator-service.yml
+                  kubectl apply -f applications/blocks-coordinator.yml
+                  kubectl apply -f applications/blocks-coordinator-service.yml
 
     infra-destroy:
         name: Destroy Kubernetes infrastructure
