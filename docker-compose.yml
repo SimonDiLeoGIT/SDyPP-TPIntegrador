@@ -45,6 +45,25 @@ services:
             - HASH_CHALLENGE=00
         networks:
             - blockchain-network
+
+    pool-manager:
+        depends_on:
+            - rabbitmq
+            - redis
+        container_name: pool-manager
+        image: pool-manager:latest
+        ports:
+            - '5000'
+        environment:
+            - RABBITMQ_HOST=rabbit
+            - RABBITMQ_USER=admin
+            - RABBITMQ_PASSWORD=password
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+            - REDIS_PASSWORD=
+            - HASH_CHALLENGE=00
+        networks:
+            - blockchain-network
 networks:
     blockchain-network:
 volumes:
