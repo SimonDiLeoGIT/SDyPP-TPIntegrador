@@ -169,6 +169,7 @@ jobs:
                     
                     kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy ".*sobel.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
                   fi
+
             - name: Create RabbitMQ config
               working-directory: kubernetes
               run: |
@@ -222,6 +223,66 @@ jobs:
                     REDIS_HOST: redis-master.redis-namespace.svc.cluster.local
                     REDIS_PORT: '6379'
                   EOF
+
+            - name: Update Cloudflare DNS records
+              env:
+                  CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
+                  CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+              run: |
+                  RABBIT_SERVICE_IP=$(kubectl get svc rabbitmq -n rabbitmq-namespace -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
+
+                  if [ -z "$RABBIT_SERVICE_IP" ]; then
+                      echo "Failed to fetch backend IP"
+                      exit 1
+                  fi
+
+                  POOL_MANAGER_SERVICE_IP=$(kubectl get svc pool-manager-service -n applications-namespace -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
+
+                  if [ -z "$POOL_MANAGER_SERVICE_IP" ]; then
+                      echo "Failed to fetch backend IP"
+                      exit 1
+                  fi
+
+                  get_dns_record_id() {
+                    local record_name="$1"
+                    local zone_id="$2"
+                    local token="$3"
+
+                    local api_url="https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records?type=A&name=$record_name"
+                    local response=$(curl -s -X GET "$api_url" \
+                      -H "Authorization: Bearer $token" \
+                      -H "Content-Type: application/json")
+
+                    local record_id=$(echo "$response" | jq -r '.result[0].id')
+
+                    echo "$record_id"
+                  }
+
+                  # Obtener dinámicamente los IDs de los registros A
+                  RABBIT_DNS_RECORD_ID=$(get_dns_record_id "rabbit.inventomate.xyz" "$CLOUDFLARE_ZONE_ID" "$CLOUDFLARE_TOKEN")
+                  POOL_MANAGER_RECORD_ID=$(get_dns_record_id "poolmanager.inventomate.xyz" "$CLOUDFLARE_ZONE_ID" "$CLOUDFLARE_TOKEN")
+
+                  curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records/$RABBIT_DNS_RECORD_ID" \
+                    -H "Authorization: Bearer $CLOUDFLARE_TOKEN" \
+                    -H "Content-Type: application/json" \
+                    --data '{
+                      "type": "A",
+                      "name": "rabbit.inventomate.xyz",
+                      "content": "'"$RABBIT_SERVICE_IP"'",
+                      "ttl": 120,
+                      "proxied": false
+                    }'
+
+                  curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records/$POOL_MANAGER_RECORD_ID" \
+                    -H "Authorization: Bearer $CLOUDFLARE_TOKEN" \
+                    -H "Content-Type: application/json" \
+                    --data '{
+                      "type": "A",
+                      "name": "poolmanager.inventomate.xyz",
+                      "content": "'"$POOL_MANAGER_SERVICE_IP"'",
+                      "ttl": 120,
+                      "proxied": false
+                    }'
 
             - name: Create applications config
               working-directory: kubernetes
