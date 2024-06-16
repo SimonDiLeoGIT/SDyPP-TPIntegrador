@@ -7,6 +7,7 @@ import threading
 import time
 
 import requests
+from plugins.scheduler import start_cronjob
 from flask import Flask, jsonify
 from model.block import Block
 from pika import exceptions as rabbitmq_exceptions
@@ -18,7 +19,9 @@ app = Flask(__name__)
 
 # Variables globales para mantener las conexiones
 rabbitmq, queue_name = rabbit_connect()
-coordinator_url = os.environ.get("BLOCKS_COORDINATOR_URL")
+BLOCKS_COORDINATOR_URL = os.environ.get("BLOCKS_COORDINATOR_URL")
+POOL_MANAGER_URL = os.environ.get("POOL_MANAGER_URL")
+KEEP_ALIVE_INTERVAL = os.environ.get("KEEP_ALIVE_INTERVAL")
 
 
 @ app.route("/status")
@@ -27,6 +30,24 @@ def status():
         "status": "200",
         "description": "PoW miner is running..."
     })
+
+
+def send_keep_alive():
+    try:
+        external_ip = requests.get(
+            'https://checkip.amazonaws.com').text.strip()
+
+        body = {
+            "address": external_ip,
+            "machine_type": "GPU" if gpu_available else "CPU"
+        }
+
+        response = requests.post(
+            POOL_MANAGER_URL, json.dumps(body.to_dict()))
+        print(response.text, file=sys.stdout, flush=True)
+
+    except Exception as e:
+        print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
 
 
 def consume_tasks():
@@ -91,7 +112,7 @@ def consume_tasks():
 
             # Envía el bloque con los datos de hash y nonce al coordinador para que lo valide
             response = requests.post(
-                coordinator_url, json.dumps(block.to_dict()))
+                BLOCKS_COORDINATOR_URL, json.dumps(block.to_dict()))
             print(response.text, file=sys.stdout, flush=True)
             rabbitmq.basic_ack(method.delivery_tag)
 
@@ -109,4 +130,6 @@ def consume_tasks():
 time.sleep(5)
 gpu_available = check_for_nvidia_smi()
 consumer_thread = threading.Thread(target=consume_tasks)
+# Iniciar el cronjob para emitir los keep-alive
+start_cronjob(send_keep_alive, KEEP_ALIVE_INTERVAL)
 consumer_thread.start()
