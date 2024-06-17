@@ -79,6 +79,16 @@ spec:
                             configMapKeyRef:
                                 name: application-config
                                 key: EXPIRATION_TIME
+                      - name: CREDENTIALS_PATH
+                        value: /credentials/credentials.json
+                  volumeMounts:
+                      - name: credentials-volume
+                        mountPath: /credentials
+                        readOnly: true
+            volumes:
+                - name: credentials-volume
+                  configMap:
+                      name: credentials-config
             # Agrega toleration para asegurar que los pods se creen unicamente en el node group de aplicaciones
             tolerations:
                 - key: instance_type
