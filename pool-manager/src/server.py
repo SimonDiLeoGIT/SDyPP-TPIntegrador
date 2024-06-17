@@ -1,18 +1,19 @@
 import ast
-import pika
 import json
+import os
 import sys
 import threading
 import time
-import os
-from redis import exceptions as redis_exceptions
-from pika import exceptions as rabbitmq_exceptions
-from flask import Flask, jsonify, request
 from datetime import datetime
+
+import pika
+from flask import Flask, jsonify, request
 from model.block import Block
+from pika import exceptions as rabbitmq_exceptions
 from plugins.rabbitmq import rabbit_connect
 from plugins.redis import redis_connect
 from plugins.scheduler import start_cronjob
+from redis import exceptions as redis_exceptions
 
 app = Flask(__name__)
 
@@ -20,6 +21,8 @@ app = Flask(__name__)
 MAX_RANGE = int(os.environ.get("MAX_RANGE"))
 CPU_MINER_INSTANCES = int(os.environ.get("CPU_MINERS_COUNT"))
 EXPIRATION_TIME = int(os.environ.get("EXPIRATION_TIME"))
+KEEP_ALIVE_INTERVAL = int(os.environ.get("KEEP_ALIVE_INTERVAL"))
+CPU_HASH_CHALLENGE = os.environ.get("CPU_HASH_CHALLENGE")
 
 # Variables globales para mantener las conexiones
 rabbitmq = rabbit_connect()
@@ -34,6 +37,7 @@ def create_mining_subtasks(block, challenge):
             miners_count = gpu_miners_alive
         else:
             miners_count = CPU_MINER_INSTANCES
+            challenge = CPU_HASH_CHALLENGE
 
         range_interval = round(MAX_RANGE/miners_count)
         range_from = 1
@@ -124,7 +128,7 @@ def check_pool_status():
         # TODO:  Iniciar mineros CPU en la nube
 
 
-start_cronjob(check_pool_status, EXPIRATION_TIME)
+start_cronjob(check_pool_status, KEEP_ALIVE_INTERVAL)
 
 
 @ app.route("/status")
@@ -167,7 +171,6 @@ def register():
     node_id = round(datetime.now().timestamp())
     timestamp = int(time.time())
     print("Node id: ", node_id, file=sys.stdout, flush=True)
-    # redis_client.hset('myhash', 'field1', 'value1')
     redis.hset(f"worker-{node_id}", mapping={
         "last_keep_alive": timestamp,
     })

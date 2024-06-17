@@ -63,10 +63,10 @@ services:
             - REDIS_PASSWORD=
             - CPU_HASH_CHALLENGE=0000
             - GPU_HASH_CHALLENGE=000000
-            - KEEP_ALIVE_INTERVAL=45
-            - MAX_RANGE=4
+            - KEEP_ALIVE_INTERVAL=40
+            - MAX_RANGE=10000000
             - CPU_MINERS_COUNT=4
-            - EXPIRATION_TIME=10
+            - EXPIRATION_TIME=15
         networks:
             - blockchain-network
 networks:
