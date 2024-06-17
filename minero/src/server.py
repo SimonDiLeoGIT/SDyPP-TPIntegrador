@@ -22,6 +22,7 @@ rabbitmq, queue_name = rabbit_connect()
 BLOCKS_COORDINATOR_URL = os.environ.get("BLOCKS_COORDINATOR_URL")
 POOL_MANAGER_URL = os.environ.get("POOL_MANAGER_URL")
 KEEP_ALIVE_INTERVAL = os.environ.get("KEEP_ALIVE_INTERVAL")
+
 node_id = None
 
 
@@ -32,21 +33,32 @@ def status():
         "description": "PoW miner is running..."
     })
 
+
 def send_register():
     try:
-        response = requests.get(f"{POOL_MANAGER_URL}/register")
-        response.raise_for_status()  # Lanza una excepción si la respuesta tiene un código de estado HTTP de error
+        print("Registering with pool manager...",
+              file=sys.stdout, flush=True)
+        global node_id
+        while node_id is None:
+            response = requests.get(f"{POOL_MANAGER_URL}/register")
+            # Lanza una excepción si la respuesta tiene un código de estado HTTP de error
+            response.raise_for_status()
 
-        # Intenta analizar la respuesta como JSON
-        data = response.json()
+            # Intenta analizar la respuesta como JSON
+            data = ast.literal_eval(response.text)
 
-        # Extrae el valor de 'node_id'
-        node_id = data.get('node_id')
+            print(f"data: {data.get('node_id')}",
+                  file=sys.stdout, flush=True)
 
-        if node_id is not None:
-            print(f"node_id: {node_id}", file=sys.stdout, flush=True)
-        else:
-            print("node_id not found in the response.", file=sys.stderr, flush=True)
+            # Extrae el valor de 'node_id'
+            node_id = data.get('node_id')
+
+            if node_id is not None:
+                print(
+                    f"GPU worker {node_id} registered succesfully.", file=sys.stdout, flush=True)
+            else:
+                print("Waiting for pool manager to be ready...",
+                      file=sys.stdout, flush=True)
 
     except requests.exceptions.RequestException as e:
         print(f"HTTP request error: {e}", file=sys.stderr, flush=True)
@@ -61,12 +73,14 @@ def send_keep_alive():
         body = {
             "node_id": node_id,
         }
+
         response = requests.post(
-            f"{POOL_MANAGER_URL}/keep-alive", json.dumps(body.to_dict()))
+            f"{POOL_MANAGER_URL}/keep-alive", json.dumps(body))
         print(response.text, file=sys.stdout, flush=True)
 
     except Exception as e:
         print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
+
 
 def consume_tasks():
     print(" [*] Waiting for messages. To exit press CTRL+C")

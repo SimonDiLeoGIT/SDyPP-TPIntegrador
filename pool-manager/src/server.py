@@ -67,6 +67,7 @@ def create_mining_subtasks(block, challenge):
         print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
         return False
 
+
 def get_worker_keys(pattern='worker-*'):
     cursor = '0'  # Inicializa el cursor
     worker_keys = []
@@ -75,6 +76,7 @@ def get_worker_keys(pattern='worker-*'):
         worker_keys.extend(keys)
     return worker_keys
 
+
 def delete_key(key):
     result = redis.delete(key)
     if result == 1:
@@ -82,12 +84,6 @@ def delete_key(key):
     else:
         print(f"Key '{key}' not found.")
 
-def update_keep_alive(node_id):
-    timestamp = int(time.time())
-    print("Node ", node_id, " actualiza estado...")
-    redis.hset(node_id, mapping={
-        "last_keep_alive": timestamp,
-    })
 
 def check_node_status(node_id):
     try:
@@ -112,8 +108,8 @@ def get_gpu_active_nodes():
     try:
         gpu_active_nodes = 0
         all_nodes = get_worker_keys()
-        for node_ip in all_nodes:
-            if check_node_status(node_ip.decode()):
+        for node_id in all_nodes:
+            if check_node_status(node_id):
                 active_nodes += 1
         return gpu_active_nodes
     except redis_exceptions.RedisError as error:
@@ -126,11 +122,6 @@ def check_pool_status():
     if (gpu_active_nodes == 0):
         print("Creating cloud miners...")
         # TODO:  Iniciar mineros CPU en la nube
-
-
-def check_queue_status():
-    print("Checking queue status...")
-    # TODO: Iniciar mineros CPU en la nube
 
 
 start_cronjob(check_pool_status, EXPIRATION_TIME)
@@ -146,15 +137,29 @@ def status():
 
 @ app.route("/keep-alive", methods=['POST'])
 def keep_alive():
-    miner_information = ast.literal_eval(
-        request.get_data().decode("utf-8"))  # {address, miner_type}
-    update_keep_alive(
-        miner_information["node_id"])
+    try:
+        miner_information = json.loads(request.get_data().decode("utf-8"))
 
-    return jsonify({
-        "status": "200",
-        "description": "Pool status updated successfully"
-    })
+        # Validate that 'node_id' is in the received data
+        if "node_id" in miner_information:
+            node_id = miner_information["node_id"]
+
+            timestamp = int(time.time())
+            redis.hset(node_id, mapping={
+                "last_keep_alive": timestamp,
+            })
+
+            return jsonify({
+                "status": "200",
+                "description": "Pool status updated successfully"
+            })
+        else:
+            return jsonify({"status": "error", "message": "node_id not found in the request"}), 400
+
+    except json.JSONDecodeError:
+        return jsonify({"status": "error", "message": "Invalid JSON"}), 400
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 @ app.route("/register", methods=['GET'])
@@ -163,8 +168,10 @@ def register():
     timestamp = int(time.time())
     print("Node id: ", node_id, file=sys.stdout, flush=True)
     # redis_client.hset('myhash', 'field1', 'value1')
-    redis.hset(f"worker-{node_id}","last_keep_alive",timestamp)
-    print("Pasó :) AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH",file=sys.stdout, flush=True)
+    redis.hset(f"worker-{node_id}", mapping={
+        "last_keep_alive": timestamp,
+    })
+
     return jsonify({
         "status": "200",
         "node_id": f"worker-{node_id}",
