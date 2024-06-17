@@ -3,7 +3,7 @@ FROM python:3.9.19-slim-bullseye
 WORKDIR /app
 
 # Instalar dependencias del sistema
-RUN apt-get update
+RUN apt-get update && apt-get install -y
 
 # Copiar archivos y directorios
 COPY ./requirements.txt requirements.txt
