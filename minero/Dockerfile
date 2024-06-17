@@ -17,4 +17,5 @@ RUN pip install -r requirements.txt
 
 EXPOSE 5000
 
-CMD ["python", "-m", "flask", "--app", "server", "run", "--host", "0.0.0.0"]
+CMD ["flask", "--app", "server", "run", "--host", "0.0.0.0"]
+
