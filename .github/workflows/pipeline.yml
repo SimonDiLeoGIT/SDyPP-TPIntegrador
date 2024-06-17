@@ -387,12 +387,14 @@ jobs:
 
             - name: Generate miner .env
               run: |
-                  # Escribir las variables de entorno en .env para el build del minero
+                  ls -lah
+                  touch minero/.env
                   echo "POOL_MANAGER_URL = http://poolmanager.inventomate.xyz:5000" > minero/.env
                   echo "BLOCKS_COORDINATOR_URL = http://coordinator.inventomate.xyz:5000/result" >> minero/.env
                   echo "RABBITMQ_HOST=rabbit.inventomate.xyz" >> minero/.env
                   echo "RABBITMQ_USER=$RABBITMQ_USER" >> minero/.env
                   echo "RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD" >> minero/.env
+                  ls -lah
 
             - name: Build and push miner service image
               uses: docker/build-push-action@v5
