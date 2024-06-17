@@ -157,7 +157,7 @@ jobs:
 
             - name: Google Cloud kubectl cluster metadata
               run: |
-                  REGION="us-central1-a"
+                  REGION="us-east4-a"
                   gcloud info
                   gcloud components list
                   gcloud container clusters get-credentials primary --region=${REGION}
