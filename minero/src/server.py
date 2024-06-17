@@ -185,10 +185,8 @@ def consume_tasks():
     rabbitmq.start_consuming()
 
 
-print("Iniciando", file=sys.stderr, flush=True)
 gpu_available = check_for_nvidia_smi()
 if gpu_available:
-    print("Checkeando GPU...", file=sys.stderr, flush=True)
     # Iniciar el cronjob para emitir los keep-alive
     send_register()
     start_cronjob(send_keep_alive, int(KEEP_ALIVE_INTERVAL))

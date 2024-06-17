@@ -184,7 +184,7 @@ def validateBlock():
             })
 
         # Verifica si el bloque ya existe en redis
-        block_id = f"blockchain:{new_block.hash}"
+        block_id = f"blockchain:{new_block.previous_hash}"
         block_exists = redis.hexists(block_id, "hash")
         if block_exists:
             # Si ya existe descarto está request, porque ya un minero completo la tarea antes
