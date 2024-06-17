@@ -116,6 +116,7 @@ jobs:
 
     deploy-apps:
         name: Deploy apps and services
+        needs: infra-up
         if: startsWith(github.event.head_commit.message, '(up)')
         runs-on: ubuntu-latest
         steps:
