@@ -98,7 +98,7 @@ def process_transactions():
 
 
 # Inicia el cronjob para crear bloques
-start_cronjob(process_transactions, 30)
+start_cronjob(process_transactions, 60)
 
 
 @ app.route("/status")

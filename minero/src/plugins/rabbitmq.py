@@ -23,6 +23,7 @@ def rabbit_connect():
             # Declaro exchange para las tasks de mineros
             channel.exchange_declare(
                 exchange='blockchain', exchange_type='direct', durable=True, auto_delete=False)
+            channel.queue_declare(queue='workers', durable=True)
             channel.queue_bind(
                 exchange='blockchain', queue='workers', routing_key='w')
 

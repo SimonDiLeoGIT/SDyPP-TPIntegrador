@@ -41,20 +41,25 @@ def create_mining_subtasks(block, challenge):
             miners_count = get_active_instance_count()
             challenge = CPU_HASH_CHALLENGE
 
-        range_interval = round(MAX_RANGE/miners_count)
+        if (miners_count == 0):
+            range_interval = MAX_RANGE
+        else:
+            range_interval = round(MAX_RANGE/miners_count)
         range_from = 1
         range_to = range_interval
 
         for i in range(0, miners_count):
             subtask = {
                 'from': range_from,
-                'previous_hash': range_to,
+                'to': range_to,
                 'challenge': challenge,
                 "block": block,
             }
 
+            print(f"subtask: {subtask}", file=sys.stdout, flush=True)
+
             # Update ranges for the next task
-            range_from = + range_to
+            range_from = range_to + 1
             range_to += range_interval
 
             properties = pika.BasicProperties(
@@ -63,7 +68,7 @@ def create_mining_subtasks(block, challenge):
             rabbitmq.basic_publish(
                 exchange='blockchain', routing_key='w',
                 properties=properties,
-                body=json.dumps({"challenge": challenge, "mining_task": subtask.to_dict()}))
+                body=json.dumps({"challenge": challenge, "mining_task": json.dumps(subtask)}))
 
         return True
     except rabbitmq_exceptions.AMQPError as error:
