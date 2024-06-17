@@ -36,8 +36,6 @@ jobs:
                   echo "POOL_MANAGER_URL = http://poolmanager.inventomate.xyz:5000" > minero/.env
                   echo "BLOCKS_COORDINATOR_URL = http://coordinator.inventomate.xyz:5000/result" >> minero/.env
                   echo "RABBITMQ_HOST=rabbit.inventomate.xyz" >> minero/.env
-                  echo "RABBITMQ_USER=a" >> minero/.env
-                  echo "RABBITMQ_PASSWORD=a" >> minero/.env
 
             - name: Build and push miner service image
               uses: docker/build-push-action@v5
