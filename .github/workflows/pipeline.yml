@@ -220,7 +220,7 @@ jobs:
                     
                     kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy ".*transactions.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
                     kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy ".*blocks.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
-                    kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy ".*mining_tasks.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
+                    kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy ".*workers.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
                   fi
 
             - name: Create RabbitMQ config
@@ -281,6 +281,14 @@ jobs:
               working-directory: kubernetes
               run: |
                   kubectl apply -f config.yml
+
+            - name: Create GCP config
+              working-directory: kubernetes
+              run: |
+                  echo '${{ secrets.GOOGLE_CLOUD_CREDENTIALS }}' > credentials.json
+
+                  # Crear un nuevo ConfigMap con las credenciales de GCP
+                  kubectl create configmap -n applications-namespace credentials-config --from-file=credentials.json
 
             - name: Deploy blocks coordinator
               working-directory: kubernetes/applications
