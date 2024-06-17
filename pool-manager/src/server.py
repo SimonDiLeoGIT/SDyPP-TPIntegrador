@@ -23,7 +23,7 @@ app = Flask(__name__)
 MAX_RANGE = int(os.environ.get("MAX_RANGE"))
 CPU_MINER_INSTANCES = int(os.environ.get("CPU_MINERS_COUNT"))
 EXPIRATION_TIME = int(os.environ.get("EXPIRATION_TIME"))
-KEEP_ALIVE_INTERVAL = int(os.environ.get("KEEP_ALIVE_INTERVAL"))
+CHECK_POOL_STATUS_INTERVAL = int(os.environ.get("CHECK_POOL_STATUS_INTERVAL"))
 CPU_HASH_CHALLENGE = os.environ.get("CPU_HASH_CHALLENGE")
 
 # Variables globales para mantener las conexiones
@@ -152,7 +152,7 @@ def check_pool_status():
                 f"Se estan creando instancias cpu en la nube: {CPU_MINER_INSTANCES}", file=sys.stdout, flush=True)
 
 
-start_cronjob(check_pool_status, KEEP_ALIVE_INTERVAL)
+start_cronjob(check_pool_status, CHECK_POOL_STATUS_INTERVAL)
 
 
 @ app.route("/status", methods=['GET'])

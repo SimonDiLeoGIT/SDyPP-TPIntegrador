@@ -4,45 +4,45 @@ on:
     push:
         branches: ['main']
 jobs:
-    build:
-        name: Build and Push Docker Image
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+    # build:
+    #     name: Build and Push Docker Image
+    #     runs-on: ubuntu-latest
+    #     steps:
+    #         - name: Checkout repository
+    #           uses: actions/checkout@v4
 
-            - name: Login to Docker Hub
-              uses: docker/login-action@v3
-              with:
-                  username: ${{ secrets.DOCKER_HUB_USERNAME }}
-                  password: ${{ secrets.DOCKER_HUB_TOKEN }}
+    #         - name: Login to Docker Hub
+    #           uses: docker/login-action@v3
+    #           with:
+    #               username: ${{ secrets.DOCKER_HUB_USERNAME }}
+    #               password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-            - name: Build and push blocks coordinator service image
-              uses: docker/build-push-action@v5
-              with:
-                  context: ./blocks-coordinator
-                  push: true
-                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-blocks-coordinator:latest
+    #         - name: Build and push blocks coordinator service image
+    #           uses: docker/build-push-action@v5
+    #           with:
+    #               context: ./blocks-coordinator
+    #               push: true
+    #               tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-blocks-coordinator:latest
 
-            - name: Build and push pool manager service image
-              uses: docker/build-push-action@v5
-              with:
-                  context: ./pool-manager
-                  push: true
-                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-pool-manager:latest
+    #         - name: Build and push pool manager service image
+    #           uses: docker/build-push-action@v5
+    #           with:
+    #               context: ./pool-manager
+    #               push: true
+    #               tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-pool-manager:latest
 
-            - name: Generate miner .env
-              run: |
-                  echo "POOL_MANAGER_URL = http://poolmanager.inventomate.xyz:5000" > minero/.env
-                  echo "BLOCKS_COORDINATOR_URL = http://coordinator.inventomate.xyz:5000/result" >> minero/.env
-                  echo "RABBITMQ_HOST=rabbit.inventomate.xyz" >> minero/.env
+    #         - name: Generate miner .env
+    #           run: |
+    #               echo "POOL_MANAGER_URL = http://poolmanager.inventomate.xyz:5000" > minero/.env
+    #               echo "BLOCKS_COORDINATOR_URL = http://coordinator.inventomate.xyz:5000/result" >> minero/.env
+    #               echo "RABBITMQ_HOST=rabbit.inventomate.xyz" >> minero/.env
 
-            - name: Build and push miner service image
-              uses: docker/build-push-action@v5
-              with:
-                  context: ./minero
-                  push: true
-                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-miner:latest
+    #         - name: Build and push miner service image
+    #           uses: docker/build-push-action@v5
+    #           with:
+    #               context: ./minero
+    #               push: true
+    #               tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-miner:latest
 
     configure-backend:
         name: Configure backend for terraform state
