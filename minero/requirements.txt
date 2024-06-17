@@ -3,3 +3,5 @@ pika
 python-dotenv
 requests
 APScheduler
+google-cloud-compute
+google-auth

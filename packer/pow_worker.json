@@ -1,0 +1,32 @@
+{
+	"variables": {
+		"gcloud_account_json": "../credentials.json",
+		"gcloud_project_id": "starlit-verve-424519-e5"
+	},
+	"builders": [
+		{
+			"type": "googlecompute",
+			"account_file": "{{user `gcloud_account_json`}}",
+			"project_id": "{{user `gcloud_project_id`}}",
+			"ssh_username": "ubuntu",
+			"source_image_family": "ubuntu-2004-lts",
+			"image_name": "pow-miner-{{timestamp}}",
+			"zone": "us-central1-f",
+			"machine_type": "n1-standard-2",
+			"disk_size": "20",
+			"on_host_maintenance": "TERMINATE"
+		}
+	],
+	"provisioners": [
+		{
+			"type": "shell",
+			"inline": [
+				"sudo apt-get update",
+				"sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common lsb-release",
+				"sudo curl -fsSL https://get.docker.com/ -o get-docker.sh",
+				"sudo sh get-docker.sh",
+				"sudo docker pull simondileogit/blockchain-miner:latest"
+			]
+		}
+	]
+}
