@@ -18,7 +18,7 @@ from utils.find_nonce import find_nonce_with_prefix
 app = Flask(__name__)
 
 # Variables globales para mantener las conexiones
-rabbitmq, queue_name = rabbit_connect()
+rabbitmq = rabbit_connect()
 BLOCKS_COORDINATOR_URL = os.environ.get("BLOCKS_COORDINATOR_URL")
 POOL_MANAGER_URL = os.environ.get("POOL_MANAGER_URL")
 KEEP_ALIVE_INTERVAL = os.environ.get("KEEP_ALIVE_INTERVAL")
@@ -154,7 +154,7 @@ def consume_tasks():
             print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
 
     rabbitmq.basic_consume(
-        queue=queue_name, on_message_callback=callback)
+        queue="workers", on_message_callback=callback)
     rabbitmq.start_consuming()
 
 

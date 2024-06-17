@@ -59,7 +59,7 @@ def create_mining_subtasks(block, challenge):
                 delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE)
 
             rabbitmq.basic_publish(
-                exchange='blockchain', routing_key='mt',
+                exchange='blockchain', routing_key='w',
                 properties=properties,
                 body=json.dumps({"challenge": challenge, "mining_task": subtask.to_dict()}))
 

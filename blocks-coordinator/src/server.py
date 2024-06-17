@@ -61,7 +61,7 @@ def build_block(transactions):
                 delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE)
 
             rabbitmq.basic_publish(
-                exchange='workers', routing_key='',
+                exchange='blockchain', routing_key='bl',
                 properties=properties,
                 body=json.dumps({"challenge": str(hash_challenge), "block": new_block.to_dict()}))
 
