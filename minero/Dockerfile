@@ -15,7 +15,7 @@ COPY .env .env
 
 RUN pip install -r requirements.txt
 
-EXPOSE 5005
+EXPOSE 5000
 
-CMD ["flask", "--app", "server", "run", "--host", "0.0.0.0", "--port", "5005"]
+CMD ["flask", "--app", "server", "run", "--host", "0.0.0.0"]
 
