@@ -229,7 +229,6 @@ jobs:
                     
                     kubectl apply -f services/rabbitmq.yml
 
-                    sleep 120
                     
                     kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy ".*transactions.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
                     kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy ".*blocks.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
