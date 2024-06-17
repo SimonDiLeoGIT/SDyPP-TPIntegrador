@@ -313,7 +313,7 @@ jobs:
                       exit 1
                   fi
 
-                  BLOCKS_COORDINATOR_SERVICE_IP=$(kubectl get svc blocks-coordinator-service -n applications-namespace -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
+                  BLOCKS_COORDINATOR_SERVICE_IP=$(kubectl get svc coordinator-service -n applications-namespace -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
 
                   if [ -z "$BLOCKS_COORDINATOR_SERVICE_IP" ]; then
                       echo "Failed to fetch backend IP"
