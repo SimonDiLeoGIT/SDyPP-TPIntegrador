@@ -22,6 +22,7 @@ rabbitmq, queue_name = rabbit_connect()
 BLOCKS_COORDINATOR_URL = os.environ.get("BLOCKS_COORDINATOR_URL")
 POOL_MANAGER_URL = os.environ.get("POOL_MANAGER_URL")
 KEEP_ALIVE_INTERVAL = os.environ.get("KEEP_ALIVE_INTERVAL")
+node_id = None
 
 
 @ app.route("/status")
@@ -31,24 +32,41 @@ def status():
         "description": "PoW miner is running..."
     })
 
+def send_register():
+    try:
+        response = requests.get(f"{POOL_MANAGER_URL}/register")
+        response.raise_for_status()  # Lanza una excepción si la respuesta tiene un código de estado HTTP de error
+
+        # Intenta analizar la respuesta como JSON
+        data = response.json()
+
+        # Extrae el valor de 'node_id'
+        node_id = data.get('node_id')
+
+        if node_id is not None:
+            print(f"node_id: {node_id}", file=sys.stdout, flush=True)
+        else:
+            print("node_id not found in the response.", file=sys.stderr, flush=True)
+
+    except requests.exceptions.RequestException as e:
+        print(f"HTTP request error: {e}", file=sys.stderr, flush=True)
+    except ValueError as e:
+        print(f"Error parsing JSON: {e}", file=sys.stderr, flush=True)
+    except Exception as e:
+        print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
+
 
 def send_keep_alive():
     try:
-        external_ip = requests.get(
-            'https://checkip.amazonaws.com').text.strip()
-
         body = {
-            "address": external_ip,
-            "machine_type": "GPU" if gpu_available else "CPU"
+            "node_id": node_id,
         }
-
         response = requests.post(
-            POOL_MANAGER_URL, json.dumps(body.to_dict()))
+            f"{POOL_MANAGER_URL}/keep-alive", json.dumps(body.to_dict()))
         print(response.text, file=sys.stdout, flush=True)
 
     except Exception as e:
         print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
-
 
 def consume_tasks():
     print(" [*] Waiting for messages. To exit press CTRL+C")
@@ -129,7 +147,11 @@ def consume_tasks():
 # Iniciar el consumidor al arrancar la aplicación Flask
 time.sleep(5)
 gpu_available = check_for_nvidia_smi()
+
+if gpu_available:
+    send_register()
+
 consumer_thread = threading.Thread(target=consume_tasks)
 # Iniciar el cronjob para emitir los keep-alive
-start_cronjob(send_keep_alive, KEEP_ALIVE_INTERVAL)
+start_cronjob(send_keep_alive, int(KEEP_ALIVE_INTERVAL))
 consumer_thread.start()

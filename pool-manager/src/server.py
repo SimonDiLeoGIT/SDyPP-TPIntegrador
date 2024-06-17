@@ -67,7 +67,7 @@ def create_mining_subtasks(block, challenge):
         print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
         return False
 
-def get_worker_keys(pattern='worker*'):
+def get_worker_keys(pattern='worker-*'):
     cursor = '0'  # Inicializa el cursor
     worker_keys = []
     while cursor != 0:
@@ -111,7 +111,7 @@ def get_gpu_active_nodes():
     # Función para obtener la cantidad de nodos activos
     try:
         gpu_active_nodes = 0
-        all_nodes = redis.hkeys("mining_pool")
+        all_nodes = get_worker_keys()
         for node_ip in all_nodes:
             if check_node_status(node_ip.decode()):
                 active_nodes += 1
@@ -159,8 +159,6 @@ def keep_alive():
 
 @ app.route("/register", methods=['GET'])
 def register():
-    # miner_information = ast.literal_eval(
-    #   request.get_data().decode("utf-8"))  # {address, miner_type}
     node_id = round(datetime.now().timestamp())
     timestamp = int(time.time())
     print("Node id: ", node_id, file=sys.stdout, flush=True)
