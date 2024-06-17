@@ -42,7 +42,7 @@ services:
             - REDIS_HOST=redis
             - REDIS_PORT=6379
             - REDIS_PASSWORD=
-            - HASH_CHALLENGE=000000
+            - HASH_CHALLENGE=000
         networks:
             - blockchain-network
 
@@ -64,7 +64,7 @@ services:
             - CPU_HASH_CHALLENGE=0000
             - GPU_HASH_CHALLENGE=000000
             - KEEP_ALIVE_INTERVAL=25
-            - MAX_RANGE=10000000
+            - MAX_RANGE=100000
             - CPU_MINERS_COUNT=5
             - EXPIRATION_TIME=15
             - CREDENTIALS_PATH=/credentials/credentials.json

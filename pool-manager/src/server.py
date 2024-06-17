@@ -68,7 +68,7 @@ def create_mining_subtasks(block, challenge):
             rabbitmq.basic_publish(
                 exchange='blockchain', routing_key='w',
                 properties=properties,
-                body=json.dumps({"challenge": challenge, "mining_task": json.dumps(subtask)}))
+                body=json.dumps(subtask))
 
         return True
     except rabbitmq_exceptions.AMQPError as error:

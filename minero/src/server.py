@@ -22,6 +22,7 @@ rabbitmq = rabbit_connect()
 BLOCKS_COORDINATOR_URL = os.environ.get("BLOCKS_COORDINATOR_URL")
 POOL_MANAGER_URL = os.environ.get("POOL_MANAGER_URL")
 KEEP_ALIVE_INTERVAL = os.environ.get("KEEP_ALIVE_INTERVAL")
+GPU_MAX_RANGE = int(os.environ.get("GPU_MAX_RANGE"))
 
 node_id = None
 
@@ -88,8 +89,16 @@ def consume_tasks():
     def callback(ch, method, properties, body):
         try:
             task = json.loads(body)
+
             challenge = task["challenge"]
             block = task["block"]
+            from_range = task["from"]
+            to_range = task["to"]
+
+            print(f"to_range: {to_range} type: {type(to_range)}",
+                  file=sys.stdout, flush=True)
+            print(f"from_range: {from_range} type: {type(from_range)}",
+                  file=sys.stdout, flush=True)
 
             block_hash = ""
             nonce = 0
@@ -115,21 +124,39 @@ def consume_tasks():
                 # Create the full paths
                 src_path = os.path.join(src_dir, src_file)
                 output_path = os.path.join(src_dir, output_file)
-                result_path = os.path.join(src_dir, result_file)
+                # result_path = os.path.join(src_dir, result_file)
                 result_path = os.path.join(current_dir, result_file)
+
+                # Crea vacío el archivo de resultado
+                with open(result_path, "w") as f:
+                    f.truncate(0)
+
+                gpu_from = from_range
+                gpu_to = gpu_from + GPU_MAX_RANGE
+                nonce_found = False
 
                 if not os.path.isfile(output_path):
                     # Call nvcc to compile the CUDA file if the output file does not exist
                     subprocess.call(["nvcc", src_path, "-o", output_path])
 
-                subprocess.call(
-                    [output_path, "1", "10000", challenge, block_content_hash], stdout=subprocess.DEVNULL)
+                # Invocacion del cuda
+                while (not nonce_found) and (gpu_to <= to_range):
+                    subprocess.call(
+                        [output_path, str(gpu_from), str(gpu_to), challenge, block_content_hash], stdout=subprocess.DEVNULL)
 
-                file = open(result_path, "r")
-                result = file.readlines()
-                result = ast.literal_eval(result[0])
-                block_hash = result["block_hash"]
-                nonce = result["nonce"]
+                    file = open(result_path, "r")
+                    result = file.readlines()
+                    result = ast.literal_eval(result[0])
+                    block_hash = result["block_hash"]
+                    nonce = result["nonce"]
+                    if (nonce > 0) and (block_hash != ""):
+                        nonce_found = True
+                    else:
+                        gpu_from = gpu_to + 1
+                        gpu_to += GPU_MAX_RANGE
+
+                        if (gpu_to > to_range):
+                            gpu_to = to_range
             else:
                 print("GPU no available")
                 nonce, block_hash = find_nonce_with_prefix(
@@ -158,11 +185,6 @@ def consume_tasks():
     rabbitmq.start_consuming()
 
 
-# Iniciar el consumidor al arrancar la aplicación Flask
-time.sleep(5)
-consumer_thread = threading.Thread(target=consume_tasks)
-consumer_thread.start()
-
 print("Iniciando", file=sys.stderr, flush=True)
 gpu_available = check_for_nvidia_smi()
 if gpu_available:
@@ -170,3 +192,7 @@ if gpu_available:
     # Iniciar el cronjob para emitir los keep-alive
     send_register()
     start_cronjob(send_keep_alive, int(KEEP_ALIVE_INTERVAL))
+
+# Iniciar el consumidor al arrancar la aplicación Flask
+consumer_thread = threading.Thread(target=consume_tasks)
+consumer_thread.start()
