@@ -160,12 +160,11 @@ def consume_tasks():
 
 # Iniciar el consumidor al arrancar la aplicación Flask
 time.sleep(5)
-gpu_available = check_for_nvidia_smi()
+consumer_thread = threading.Thread(target=consume_tasks)
+consumer_thread.start()
 
+gpu_available = check_for_nvidia_smi()
 if gpu_available:
     # Iniciar el cronjob para emitir los keep-alive
     send_register()
     start_cronjob(send_keep_alive, int(KEEP_ALIVE_INTERVAL))
-
-consumer_thread = threading.Thread(target=consume_tasks)
-consumer_thread.start()
