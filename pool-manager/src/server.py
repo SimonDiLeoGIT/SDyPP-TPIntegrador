@@ -67,24 +67,40 @@ def create_mining_subtasks(block, challenge):
         print(f"Unexpected error: {e}", file=sys.stderr, flush=True)
         return False
 
+def get_worker_keys(pattern='worker*'):
+    cursor = '0'  # Inicializa el cursor
+    worker_keys = []
+    while cursor != 0:
+        cursor, keys = redis.scan(cursor=cursor, match=pattern)
+        worker_keys.extend(keys)
+    return worker_keys
 
-def update_keep_alive(node_ip, miner_type):
+def delete_key(key):
+    result = redis.delete(key)
+    if result == 1:
+        print(f"Key '{key}' deleted successfully.")
+    else:
+        print(f"Key '{key}' not found.")
+
+def update_keep_alive(node_id):
     timestamp = int(time.time())
-    redis.hset("mining_pool", node_ip, mapping={
+    print("Node ", node_id, " actualiza estado...")
+    redis.hset(node_id, mapping={
         "last_keep_alive": timestamp,
-        "miner_type": miner_type
     })
 
-
-def check_node_status(node_ip):
+def check_node_status(node_id):
     try:
+        print("Chekeando estado de ", node_id)
         # Función para verificar el estado de un nodo
         current_time = int(time.time())
-        last_keep_alive = redis.hget("mining_pool", node_ip)
+        last_keep_alive = redis.hget(node_id)
         if last_keep_alive:
             last_keep_alive = int(last_keep_alive.decode())
             if current_time - last_keep_alive <= EXPIRATION_TIME:
+                print("El nodo ", node_id, " sigue vivo")
                 return True
+            print("Expiró el tiempo del nodo ", node_id)
         return False
     except redis_exceptions.RedisError as error:
         print(f"Redis error: {error}", file=sys.stderr, flush=True)
@@ -129,15 +145,31 @@ def status():
 
 
 @ app.route("/keep-alive", methods=['POST'])
-def status():
+def keep_alive():
     miner_information = ast.literal_eval(
         request.get_data().decode("utf-8"))  # {address, miner_type}
     update_keep_alive(
-        miner_information["address"], miner_information["miner_type"])
+        miner_information["node_id"])
 
     return jsonify({
         "status": "200",
         "description": "Pool status updated successfully"
+    })
+
+
+@ app.route("/register", methods=['GET'])
+def register():
+    # miner_information = ast.literal_eval(
+    #   request.get_data().decode("utf-8"))  # {address, miner_type}
+    node_id = round(datetime.now().timestamp())
+    timestamp = int(time.time())
+    print("Node id: ", node_id, file=sys.stdout, flush=True)
+    # redis_client.hset('myhash', 'field1', 'value1')
+    redis.hset(f"worker-{node_id}","last_keep_alive",timestamp)
+    print("Pasó :) AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH",file=sys.stdout, flush=True)
+    return jsonify({
+        "status": "200",
+        "node_id": f"worker-{node_id}",
     })
 
 

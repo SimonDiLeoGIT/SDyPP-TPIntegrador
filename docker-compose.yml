@@ -53,7 +53,7 @@ services:
         container_name: pool-manager
         image: pool-manager:latest
         ports:
-            - '5000'
+            - '5002:5000'
         environment:
             - RABBITMQ_HOST=rabbit
             - RABBITMQ_USER=admin
@@ -63,6 +63,9 @@ services:
             - REDIS_PASSWORD=
             - HASH_CHALLENGE=00
             - KEEP_ALIVE_INTERVAL=15
+            - MAX_RANGE=4
+            - CPU_MINERS_COUNT=4
+            - EXPIRATION_TIME=10
         networks:
             - blockchain-network
 networks:
