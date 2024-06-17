@@ -49,7 +49,7 @@ def create_multiple_instances(num_instances: int) -> None:
                     {
                         'key': 'startup-script',
                         'value': '#!/bin/bash\n'
-                                 'sudo docker pull fedesin31/entry-server'
+                                 'sudo docker run -d -p 5000:5000 --name minero-cpu simondileogit/blockchain-miner:latest'
                     }
                 ]
             }
@@ -66,6 +66,25 @@ def create_multiple_instances(num_instances: int) -> None:
         )
 
     print(f"Instances created succesfully.")
+
+
+def get_active_instance_count() -> int:
+    credentials = service_account.Credentials.from_service_account_file(
+        CREDENTIALS_PATH)
+
+    compute_client = compute_v1.InstancesClient(credentials=credentials)
+
+    # Listar todas las instancias en la zona especificada
+    instance_list = compute_client.list(project=PROJECT_ID, zone=ZONE)
+
+    active_instance_count = 0
+
+    # Iterar sobre las instancias y contar cuántas están en estado "RUNNING"
+    for instance in instance_list:
+        if instance.status == 'RUNNING':
+            active_instance_count += 1
+
+    return active_instance_count
 
 
 def destroy_all_instances() -> None:

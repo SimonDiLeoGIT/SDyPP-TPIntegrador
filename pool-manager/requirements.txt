@@ -3,3 +3,5 @@ pika
 python-dotenv
 redis
 APScheduler
+google-cloud-compute
+google-auth

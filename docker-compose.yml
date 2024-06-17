@@ -63,12 +63,15 @@ services:
             - REDIS_PASSWORD=
             - CPU_HASH_CHALLENGE=0000
             - GPU_HASH_CHALLENGE=000000
-            - KEEP_ALIVE_INTERVAL=40
+            - KEEP_ALIVE_INTERVAL=25
             - MAX_RANGE=10000000
             - CPU_MINERS_COUNT=4
             - EXPIRATION_TIME=15
+            - CREDENTIALS_PATH=/credentials/credentials.json
         networks:
             - blockchain-network
+        volumes:
+            - ./pool-manager/credentials.json:/credentials/credentials.json
 networks:
     blockchain-network:
 volumes:

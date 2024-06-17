@@ -4,6 +4,7 @@ import os
 import sys
 import threading
 import time
+import random
 from datetime import datetime
 
 import pika
@@ -13,6 +14,7 @@ from pika import exceptions as rabbitmq_exceptions
 from plugins.rabbitmq import rabbit_connect
 from plugins.redis import redis_connect
 from plugins.scheduler import start_cronjob
+from plugins.instance_compute import destroy_all_instances, create_multiple_instances, get_active_instance_count
 from redis import exceptions as redis_exceptions
 
 app = Flask(__name__)
@@ -36,7 +38,7 @@ def create_mining_subtasks(block, challenge):
         if (gpu_miners_alive > 0):
             miners_count = gpu_miners_alive
         else:
-            miners_count = CPU_MINER_INSTANCES
+            miners_count = get_active_instance_count()
             challenge = CPU_HASH_CHALLENGE
 
         range_interval = round(MAX_RANGE/miners_count)
@@ -78,30 +80,37 @@ def get_worker_keys(pattern='worker-*'):
     while cursor != 0:
         cursor, keys = redis.scan(cursor=cursor, match=pattern)
         worker_keys.extend(keys)
+    print(
+        f"Claves de todos los workers {worker_keys}", file=sys.stdout, flush=True)
     return worker_keys
 
 
 def delete_key(key):
     result = redis.delete(key)
     if result == 1:
-        print(f"Key '{key}' deleted successfully.")
+        print(f"Key '{key}' deleted successfully.",
+              file=sys.stderr, flush=True)
     else:
-        print(f"Key '{key}' not found.")
+        print(f"Key '{key}' not found.", file=sys.stdout, flush=True)
 
 
 def check_node_status(node_id):
     try:
-        print("Chekeando estado de ", node_id)
-        # Función para verificar el estado de un nodo
+        print(f"Checkeando estado de {node_id}", file=sys.stdout, flush=True)
         current_time = int(time.time())
-        last_keep_alive = redis.hget(node_id)
+        last_keep_alive = redis.hget(node_id, "last_keep_alive")
         if last_keep_alive:
-            last_keep_alive = int(last_keep_alive.decode())
+            last_keep_alive = int(last_keep_alive)
             if current_time - last_keep_alive <= EXPIRATION_TIME:
-                print("El nodo ", node_id, " sigue vivo")
+                print("El nodo ", node_id, " sigue vivo",
+                      file=sys.stdout, flush=True)
                 return True
-            print("Expiró el tiempo del nodo ", node_id)
-        return False
+            print("Expiró el tiempo del nodo",
+                  node_id, file=sys.stdout, flush=True)
+            delete_key(node_id)
+            return False
+        else:
+            return False
     except redis_exceptions.RedisError as error:
         print(f"Redis error: {error}", file=sys.stderr, flush=True)
         return False
@@ -114,7 +123,7 @@ def get_gpu_active_nodes():
         all_nodes = get_worker_keys()
         for node_id in all_nodes:
             if check_node_status(node_id):
-                active_nodes += 1
+                gpu_active_nodes += 1
         return gpu_active_nodes
     except redis_exceptions.RedisError as error:
         print(f"Redis error: {error}", file=sys.stderr, flush=True)
@@ -123,15 +132,25 @@ def get_gpu_active_nodes():
 
 def check_pool_status():
     gpu_active_nodes = get_gpu_active_nodes()
-    if (gpu_active_nodes == 0):
-        print("Creating cloud miners...")
-        # TODO:  Iniciar mineros CPU en la nube
+    print(
+        f"Esta es la cantidad de workers gpu activos: {gpu_active_nodes}", file=sys.stdout, flush=True)
+
+    if (gpu_active_nodes > 0):
+        print("Hay mineros GPU activos", file=sys.stdout, flush=True)
+        if get_active_instance_count() > 0:
+            destroy_all_instances()
+    else:
+        print("Hay 0 mineros GPU activos", file=sys.stdout, flush=True)
+        if get_active_instance_count() == 0:
+            create_multiple_instances(CPU_MINER_INSTANCES)
+            print(
+                f"Se estan creando instancias cpu en la nube: {CPU_MINER_INSTANCES}", file=sys.stdout, flush=True)
 
 
 start_cronjob(check_pool_status, KEEP_ALIVE_INTERVAL)
 
 
-@ app.route("/status")
+@ app.route("/status", methods=['GET'])
 def status():
     return jsonify({
         "status": "200",
@@ -168,9 +187,8 @@ def keep_alive():
 
 @ app.route("/register", methods=['GET'])
 def register():
-    node_id = round(datetime.now().timestamp())
+    node_id = round(datetime.now().timestamp() + random.randint(0, 1000))
     timestamp = int(time.time())
-    print("Node id: ", node_id, file=sys.stdout, flush=True)
     redis.hset(f"worker-{node_id}", mapping={
         "last_keep_alive": timestamp,
     })
