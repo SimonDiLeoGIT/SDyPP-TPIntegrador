@@ -61,8 +61,9 @@ services:
             - REDIS_HOST=redis
             - REDIS_PORT=6379
             - REDIS_PASSWORD=
-            - HASH_CHALLENGE=00
-            - KEEP_ALIVE_INTERVAL=15
+            - CPU_HASH_CHALLENGE=0000
+            - GPU_HASH_CHALLENGE=000000
+            - KEEP_ALIVE_INTERVAL=45
             - MAX_RANGE=4
             - CPU_MINERS_COUNT=4
             - EXPIRATION_TIME=10

@@ -4,7 +4,7 @@ on:
     push:
         branches: ['main']
 jobs:
-    build-images:
+    build:
         name: Build and Push Docker Image
         runs-on: ubuntu-latest
         steps:
@@ -23,6 +23,20 @@ jobs:
                   context: ./blocks-coordinator
                   push: true
                   tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-blocks-coordinator:latest
+
+            - name: Build and push pool manager service image
+              uses: docker/build-push-action@v5
+              with:
+                  context: ./pool-manager
+                  push: true
+                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-pool-manager:latest
+
+            - name: Build and push miner service image
+              uses: docker/build-push-action@v5
+              with:
+                  context: ./minero
+                  push: true
+                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-miner:latest
 
     configure-backend:
         name: Configure backend for terraform state
@@ -59,6 +73,7 @@ jobs:
 
     infra-up:
         name: Build Kubernetes infrastructure
+        needs: configure-backend
         if: startsWith(github.event.head_commit.message, '(up)')
         runs-on: ubuntu-latest
         env:
@@ -93,9 +108,45 @@ jobs:
 
                   terraform apply -lock=false --auto-approve
 
+    build-images:
+        name: Deploy apps and services
+        if: startsWith(github.event.head_commit.message, '(up)')
+        needs: infra-up
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Login to Docker Hub
+              uses: docker/login-action@v3
+              with:
+                  username: ${{ secrets.DOCKER_HUB_USERNAME }}
+                  password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+            - name: Build and push blocks coordinator service image
+              uses: docker/build-push-action@v5
+              with:
+                  context: ./blocks-coordinator
+                  push: true
+                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-blocks-coordinator:latest
+
+            - name: Build and push pool manager service image
+              uses: docker/build-push-action@v5
+              with:
+                  context: ./pool-manager
+                  push: true
+                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-pool-manager:latest
+
+            - name: Build and push miner service image
+              uses: docker/build-push-action@v5
+              with:
+                  context: ./minero
+                  push: true
+                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-miner:latest
+
     deploy-apps:
         name: Deploy apps and services
-        needs: infra-up
+        needs: build-images
         if: startsWith(github.event.head_commit.message, '(up)')
         runs-on: ubuntu-latest
         steps:
@@ -226,6 +277,23 @@ jobs:
                     REDIS_PORT: '6379'
                   EOF
 
+            - name: Create applications config
+              working-directory: kubernetes
+              run: |
+                  kubectl apply -f config.yml
+
+            - name: Deploy blocks coordinator
+              working-directory: kubernetes/applications
+              run: |
+                  kubectl apply -f blocks-coordinator.yml
+                  kubectl apply -f blocks-coordinator-service.yml
+
+            - name: Deploy pool manager
+              working-directory: kubernetes/aplications
+              run: |
+                  kubectl apply -f pool-manager.yml
+                  kubectl apply -f pool-manager-service.yml
+
             - name: Update Cloudflare DNS records
               env:
                   CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
@@ -304,17 +372,6 @@ jobs:
                       "ttl": 120,
                       "proxied": false
                     }'
-
-            - name: Create applications config
-              working-directory: kubernetes
-              run: |
-                  kubectl apply -f config.yml
-
-            - name: Deploy applications
-              working-directory: kubernetes
-              run: |
-                  kubectl apply -f applications/blocks-coordinator.yml
-                  kubectl apply -f applications/blocks-coordinator-service.yml
 
     infra-destroy:
         name: Destroy Kubernetes infrastructure

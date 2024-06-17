@@ -5,3 +5,9 @@ metadata:
     namespace: applications-namespace
 data:
     HASH_CHALLENGE: '0000'
+    CPU_HASH_CHALLENGE: '0000'
+    GPU_HASH_CHALLENGE: '000000'
+    CHECK_KEEP_ALIVE_INTERVAL: '45'
+    MAX_RANGE: '10000000'
+    CPU_MINERS_COUNT: '4'
+    EXPIRATION_TIME: '30'

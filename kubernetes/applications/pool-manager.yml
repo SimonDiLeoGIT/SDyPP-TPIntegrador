@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: pool-manager
+    namespace: applications-namespace
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: pool-manager
+    template:
+        metadata:
+            labels:
+                app: pool-manager
+        spec:
+            containers:
+                - name: pool-manager
+                  image: 'simondileogit/blockchain-pool-manager:latest'
+                  ports:
+                      - containerPort: 5000
+                  env:
+                      - name: REDIS_HOST
+                        valueFrom:
+                            configMapKeyRef:
+                                name: redis-config
+                                key: REDIS_HOST
+                      - name: REDIS_PORT
+                        valueFrom:
+                            configMapKeyRef:
+                                name: redis-config
+                                key: REDIS_PORT
+                      - name: REDIS_PASSWORD
+                        valueFrom:
+                            configMapKeyRef:
+                                name: redis-config
+                                key: REDIS_PASSWORD
+                      - name: RABBITMQ_HOST
+                        valueFrom:
+                            configMapKeyRef:
+                                name: rabbit-config
+                                key: RABBITMQ_HOST
+                      - name: RABBITMQ_USER
+                        valueFrom:
+                            configMapKeyRef:
+                                name: rabbit-config
+                                key: RABBITMQ_USER
+                      - name: RABBITMQ_PASSWORD
+                        valueFrom:
+                            configMapKeyRef:
+                                name: rabbit-config
+                                key: RABBITMQ_PASSWORD
+                      - name: CPU_HASH_CHALLENGE
+                        valueFrom:
+                            configMapKeyRef:
+                                name: application-config
+                                key: CPU_HASH_CHALLENGE
+                      - name: GPU_HASH_CHALLENGE
+                        valueFrom:
+                            configMapKeyRef:
+                                name: application-config
+                                key: GPU_HASH_CHALLENGE
+                      - name: KEEP_ALIVE_INTERVAL
+                        valueFrom:
+                            configMapKeyRef:
+                                name: application-config
+                                key: KEEP_ALIVE_INTERVAL
+                      - name: MAX_RANGE
+                        valueFrom:
+                            configMapKeyRef:
+                                name: application-config
+                                key: MAX_RANGE
+                      - name: CPU_MINERS_COUNT
+                        valueFrom:
+                            configMapKeyRef:
+                                name: application-config
+                                key: CPU_MINERS_COUNT
+                      - name: EXPIRATION_TIME
+                        valueFrom:
+                            configMapKeyRef:
+                                name: application-config
+                                key: EXPIRATION_TIME
+            # Agrega toleration para asegurar que los pods se creen unicamente en el node group de aplicaciones
+            tolerations:
+                - key: instance_type
+                  operator: Equal
+                  value: applications
+                  effect: NoSchedule
+            affinity:
+                nodeAffinity:
+                    requiredDuringSchedulingIgnoredDuringExecution:
+                        nodeSelectorTerms:
+                            - matchExpressions:
+                                  - key: role
+                                    operator: In
+                                    values:
+                                        - applications
