@@ -108,13 +108,12 @@ jobs:
 
                   terraform apply -lock=false --auto-approve
 
-    build-images:
+    deploy-apps:
         name: Deploy apps and services
         if: startsWith(github.event.head_commit.message, '(up)')
-        needs: infra-up
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout repository
+            - name: Checkout code
               uses: actions/checkout@v4
 
             - name: Login to Docker Hub
@@ -136,22 +135,6 @@ jobs:
                   context: ./pool-manager
                   push: true
                   tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-pool-manager:latest
-
-            - name: Build and push miner service image
-              uses: docker/build-push-action@v5
-              with:
-                  context: ./minero
-                  push: true
-                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-miner:latest
-
-    deploy-apps:
-        name: Deploy apps and services
-        needs: build-images
-        if: startsWith(github.event.head_commit.message, '(up)')
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
 
             # Configuración CLI Google Cloud.
             - name: Google Cloud authentication
@@ -222,6 +205,13 @@ jobs:
                     kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy ".*blocks.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
                     kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy ".*workers.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
                   fi
+
+            - name: Wait for rabbit service to be ready
+              run: |
+                  while [[ -z "$(kubectl get svc rabbitmq -n rabbitmq-namespace -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')" ]]; do
+                    echo "Waiting for pool-manager-service to be ready..."
+                    sleep 10
+                  done
 
             - name: Create RabbitMQ config
               working-directory: kubernetes
@@ -302,6 +292,20 @@ jobs:
                   kubectl apply -f pool-manager.yml
                   kubectl apply -f pool-manager-service.yml
 
+            - name: Wait for blocks coordinator service to be ready
+              run: |
+                  while [[ -z "$(kubectl get svc coordinator-service -n applications-namespace -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" ]]; do
+                    echo "Waiting for coordinator-service to be ready..."
+                    sleep 10
+                  done
+
+            - name: Wait for pool manager service to be ready
+              run: |
+                  while [[ -z "$(kubectl get svc pool-manager-service -n applications-namespace -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" ]]; do
+                    echo "Waiting for pool-manager-service to be ready..."
+                    sleep 10
+                  done
+
             - name: Update Cloudflare DNS records
               env:
                   CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
@@ -310,21 +314,21 @@ jobs:
                   RABBIT_SERVICE_IP=$(kubectl get svc rabbitmq -n rabbitmq-namespace -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
 
                   if [ -z "$RABBIT_SERVICE_IP" ]; then
-                      echo "Failed to fetch backend IP"
+                      echo "Failed to fetch rabbitmq IP"
                       exit 1
                   fi
 
                   POOL_MANAGER_SERVICE_IP=$(kubectl get svc pool-manager-service -n applications-namespace -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
 
                   if [ -z "$POOL_MANAGER_SERVICE_IP" ]; then
-                      echo "Failed to fetch backend IP"
+                      echo "Failed to fetch pool-manager IP"
                       exit 1
                   fi
 
                   BLOCKS_COORDINATOR_SERVICE_IP=$(kubectl get svc coordinator-service -n applications-namespace -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
 
                   if [ -z "$BLOCKS_COORDINATOR_SERVICE_IP" ]; then
-                      echo "Failed to fetch backend IP"
+                      echo "Failed to fetch blocks-coordinator IP"
                       exit 1
                   fi
 
@@ -381,6 +385,21 @@ jobs:
                       "proxied": false
                     }'
 
+            - name: Generate miner .env
+              run: |
+                  # Escribir las variables de entorno en .env para el build del minero
+                  echo "POOL_MANAGER_URL = http://poolmanager.inventomate.xyz:5000" > minero/.env
+                  echo "BLOCKS_COORDINATOR_URL = http://coordinator.inventomate.xyz:5000/result" >> minero/.env
+                  echo "RABBITMQ_HOST=rabbit.inventomate.xyz" >> minero/.env
+                  echo "RABBITMQ_USER=$RABBITMQ_USER" >> minero/.env
+                  echo "RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD" >> minero/.env
+
+            - name: Build and push miner service image
+              uses: docker/build-push-action@v5
+              with:
+                  context: ./minero
+                  push: true
+                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-miner:latest
     infra-destroy:
         name: Destroy Kubernetes infrastructure
         if: startsWith(github.event.head_commit.message, '(down)')
