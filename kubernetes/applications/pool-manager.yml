@@ -16,6 +16,7 @@ spec:
             containers:
                 - name: pool-manager
                   image: 'simondileogit/blockchain-pool-manager:latest'
+                  imagePullPolicy: Always
                   ports:
                       - containerPort: 5000
                   env:

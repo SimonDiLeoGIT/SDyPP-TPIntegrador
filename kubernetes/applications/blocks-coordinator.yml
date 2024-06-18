@@ -16,6 +16,7 @@ spec:
             containers:
                 - name: coordinator
                   image: 'simondileogit/blockchain-blocks-coordinator:latest'
+                  imagePullPolicy: Always
                   ports:
                       - containerPort: 5000
                   env:
