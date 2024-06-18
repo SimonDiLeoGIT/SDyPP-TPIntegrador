@@ -38,12 +38,12 @@ KEEP_ALIVE_INTERVAL=5
 GPU_MAX_RANGE=80000
 ```
 
-3. Iniciar la aplicación:
+4. Iniciar la aplicación:
 
 ```sh
 flask --app src/server.py run --host 0.0.0.0
 ```
-4. Enviar transacciones para empezar los procesos:
+5. Enviar transacciones para empezar los procesos:
 
 ```sh
 curl -X POST \
