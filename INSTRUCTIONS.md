@@ -1,6 +1,5 @@
 # Instrucciones para correr el TP de manera local
 
-
 ### Levantar la blockchain
 
 1. Iniciar la aplicación.
@@ -8,7 +7,6 @@
 ```sh
 sh build.sh
 ```
-
 
 ### Levantar los mineros aparte
 
@@ -19,6 +17,7 @@ sh build.sh
 ```sh
 cd minero
 ```
+
 2. Instalan las dependencias:
 
 ```sh
@@ -26,6 +25,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+
 3.Crear .env con los siguientes valores dentro de la carpeta del minero
 
 ```sh
@@ -43,6 +43,7 @@ GPU_MAX_RANGE=80000
 ```sh
 flask --app src/server.py run --host 0.0.0.0
 ```
+
 5. Enviar transacciones para empezar los procesos:
 
 ```sh
