@@ -1,7 +1,7 @@
 {
 	"variables": {
 		"gcloud_account_json": "credentials.json",
-		"gcloud_project_id": "starlit-verve-424519-e5"
+		"gcloud_project_id": "mineros-blockchain"
 	},
 	"builders": [
 		{
