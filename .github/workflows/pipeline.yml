@@ -170,9 +170,9 @@ jobs:
 
                     sleep 20
 
-                    kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy ".*transactions.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
-                    kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy ".*blocks.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
-                    kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy ".*workers.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
+                    kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy-transactions ".*transactions.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
+                    kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy-blocks ".*blocks.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
+                    kubectl exec -it rabbitmq-server-0 -n rabbitmq-namespace -- rabbitmqctl set_policy ha-policy-workers ".*workers.*" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'
                   fi
 
             - name: Wait for rabbit service to be ready
