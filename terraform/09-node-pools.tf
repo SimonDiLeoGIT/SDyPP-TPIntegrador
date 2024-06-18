@@ -44,7 +44,7 @@ resource "google_container_node_pool" "applications" {
 resource "google_container_node_pool" "services" {
   name       = "services"
   cluster    = google_container_cluster.primary.id
-  node_count = 2
+  node_count = 1
 
   management {
     auto_repair  = true
@@ -52,13 +52,13 @@ resource "google_container_node_pool" "services" {
   }
 
   autoscaling {
-    min_node_count = 2
+    min_node_count = 1
     max_node_count = 10
   }
 
   node_config {
     preemptible  = false
-    machine_type = "e2-standard-4"
+    machine_type = "e2-standard-8"
 
     labels = {
       role = "services"
