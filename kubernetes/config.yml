@@ -4,7 +4,7 @@ metadata:
     name: application-config
     namespace: applications-namespace
 data:
-    HASH_CHALLENGE: '0000'
+    HASH_CHALLENGE: '000000'
     CPU_HASH_CHALLENGE: '0000'
     GPU_HASH_CHALLENGE: '000000'
     CHECK_POOL_STATUS_INTERVAL: '40'

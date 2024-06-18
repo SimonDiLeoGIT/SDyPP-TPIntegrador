@@ -4,7 +4,7 @@ metadata:
     name: pool-manager
     namespace: applications-namespace
 spec:
-    replicas: 1
+    replicas: 3
     selector:
         matchLabels:
             app: pool-manager
