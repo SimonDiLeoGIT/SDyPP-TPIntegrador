@@ -26,6 +26,18 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+3.Crear .env con los siguientes valores dentro de la carpeta del minero
+
+```sh
+RABBITMQ_USER=admin
+RABBITMQ_PASSWORD=password
+RABBITMQ_HOST=localhost
+BLOCKS_COORDINATOR_URL=http://localhost:5001/result
+POOL_MANAGER_URL=http://localhost:5002/result
+KEEP_ALIVE_INTERVAL=5
+GPU_MAX_RANGE=80000
+```
+
 3. Iniciar la aplicación:
 
 ```sh
