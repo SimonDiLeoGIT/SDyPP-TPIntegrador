@@ -355,6 +355,9 @@ jobs:
 
             - name: Generate miner .env
               run: |
+                  RABBITMQ_PASSWORD=$(kubectl get secret rabbitmq-default-user -o jsonpath="{.data.password}" -n rabbitmq-namespace | base64 --decode)
+                  RABBITMQ_USER=$(kubectl get secret rabbitmq-default-user -o jsonpath="{.data.username}" -n rabbitmq-namespace | base64 --decode)
+
                   echo "POOL_MANAGER_URL=http://poolmanager.inventomate.xyz:5000" > minero/.env.prod
                   echo "BLOCKS_COORDINATOR_URL=http://coordinator.inventomate.xyz:5000/result" >> minero/.env.prod
                   echo "RABBITMQ_HOST=rabbit.inventomate.xyz" >> minero/.env.prod
