@@ -19,6 +19,7 @@ app = Flask(__name__)
 
 # Variables globales para mantener las conexiones
 rabbitmq = rabbit_connect()
+
 BLOCKS_COORDINATOR_URL = os.environ.get("BLOCKS_COORDINATOR_URL")
 POOL_MANAGER_URL = os.environ.get("POOL_MANAGER_URL")
 KEEP_ALIVE_INTERVAL = os.environ.get("KEEP_ALIVE_INTERVAL")

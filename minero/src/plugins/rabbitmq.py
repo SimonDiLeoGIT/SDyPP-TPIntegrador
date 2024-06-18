@@ -1,5 +1,6 @@
 import pika
 import os
+import sys
 import time
 
 
@@ -36,7 +37,8 @@ def rabbit_connect():
         channel = connect()
         if channel:
             break
-        print("Failed to connect to RabbitMQ. Retrying in 5 seconds...")
+        print("Failed to connect to RabbitMQ. Retrying in 5 seconds...",
+              file=sys.stdout, flush=True)
         time.sleep(5)
 
     return channel
