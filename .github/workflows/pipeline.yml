@@ -94,7 +94,7 @@ jobs:
               with:
                   context: ./blocks-coordinator
                   push: true
-                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-blocks-coordinator:latest
+                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-blocks-coordinator:1.0.0
 
             - name: Build and push pool manager service image
               uses: docker/build-push-action@v5

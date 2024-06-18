@@ -25,9 +25,9 @@ class Block:
 
     # Recalcular el hash md5(nonce + md5(index+timestamp+data+previous_hash)) que calcularon los mineros para ver si es válido
     def validate(self):
-        hash_challenge = os.environ.get("HASH_CHALLENGE")
-        if (not self.hash.startswith(hash_challenge)):
-            return False
+        # hash_challenge = os.environ.get("HASH_CHALLENGE")
+        # if (not self.hash.startswith(hash_challenge)):
+        #     return False
 
         serialized_data = [json.dumps(obj) for obj in self.data]
         data_as_string = ''.join(serialized_data)
