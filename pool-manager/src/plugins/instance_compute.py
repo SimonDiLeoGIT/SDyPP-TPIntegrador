@@ -17,7 +17,7 @@ def create_multiple_instances(num_instances: int) -> None:
     INSTANCE_NAME_PREFIX = 'miner-cpu'  # Nombre de la instancia que crearás
     MACHINE_TYPE = f'zones/{ZONE}/machineTypes/e2-highcpu-4'
     SUBNETWORK = f'projects/{PROJECT_ID}/regions/us-east1/subnetworks/default'
-    SOURCE_IMAGE = f'projects/{PROJECT_ID}/global/images/pow-miner-1718714258'
+    SOURCE_IMAGE = f'projects/{PROJECT_ID}/global/images/pow-miner-1718719186'
     NETWORK_INTERFACE = {
         'subnetwork': SUBNETWORK,
         'access_configs': [
