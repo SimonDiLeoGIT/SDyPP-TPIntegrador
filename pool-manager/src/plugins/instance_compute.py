@@ -17,7 +17,7 @@ def create_multiple_instances(num_instances: int) -> None:
     INSTANCE_NAME_PREFIX = 'miner-cpu'  # Nombre de la instancia que crearás
     MACHINE_TYPE = f'zones/{ZONE}/machineTypes/e2-highcpu-4'
     SUBNETWORK = f'projects/{PROJECT_ID}/regions/us-east1/subnetworks/default'
-    SOURCE_IMAGE = f'projects/{PROJECT_ID}/global/images/ubuntu-2004-focal-v20220224'
+    SOURCE_IMAGE = 'projects/ubuntu-os-cloud/global/images/ubuntu-2004-focal-v20240307b',
     NETWORK_INTERFACE = {
         'subnetwork': SUBNETWORK,
         'access_configs': [
@@ -49,7 +49,7 @@ def create_multiple_instances(num_instances: int) -> None:
                     {
                         'key': 'startup-script',
                         'value': '#!/bin/bash\n'
-                                 'sudo docker run -d -p 5000:5000 --name minero-cpu simondileogit/blockchain-miner:latest'
+                                 'sudo docker run -d -p 5000:5000 --name minero-cpu simondileogit/blockchain-miner:1.0.0'
                     }
                 ]
             }

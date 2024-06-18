@@ -101,7 +101,7 @@ jobs:
               with:
                   context: ./pool-manager
                   push: true
-                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-pool-manager:latest
+                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-pool-manager:1.0.0
 
             # Configuración CLI Google Cloud.
             - name: Google Cloud authentication
@@ -370,7 +370,7 @@ jobs:
               with:
                   context: ./minero
                   push: true
-                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-miner:latest
+                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-miner:1.0.0
     infra-destroy:
         name: Destroy Kubernetes infrastructure
         if: startsWith(github.event.head_commit.message, '(down)')
