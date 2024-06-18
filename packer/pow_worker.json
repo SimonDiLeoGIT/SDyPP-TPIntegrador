@@ -25,7 +25,7 @@
 				"sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common lsb-release",
 				"sudo curl -fsSL https://get.docker.com/ -o get-docker.sh",
 				"sudo sh get-docker.sh",
-				"sudo docker pull simondileogit/blockchain-miner:latest"
+				"sudo docker pull simondileogit/blockchain-miner:1.0.0"
 			]
 		}
 	]

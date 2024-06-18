@@ -101,7 +101,7 @@ jobs:
               with:
                   context: ./pool-manager
                   push: true
-                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-pool-manager:1.0.0
+                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blockchain-pool-manager:1.0.1
 
             # Configuración CLI Google Cloud.
             - name: Google Cloud authentication
