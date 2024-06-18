@@ -8,6 +8,5 @@ Las encontrara preguntando por CUDA MD5.
 
 - Compilación y ejecución:
 ```sh
-nvcc -o md5_hash md5_hash.cu -std=c++11 -arch=sm_35
-./md5_hash '<cadena>'
+sh compilo.sh 
 ```
