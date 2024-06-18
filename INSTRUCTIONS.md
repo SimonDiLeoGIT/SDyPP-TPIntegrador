@@ -47,7 +47,7 @@ flask --app src/server.py run --host 0.0.0.0
 
 ```sh
 curl -X POST \
-  http://localhost:5001/ \
+  http://localhost:5001/transaction \
   -H 'Content-Type: application/json' \
   -d '{
     "sender": "9b22add3e341cbada2c289d6d6e28b70",
