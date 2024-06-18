@@ -36,4 +36,4 @@ if __name__ == '__main__':
     while True:
         for i in range(3):
             send_transaction()
-        time.sleep(75)
+        time.sleep(3*75)
