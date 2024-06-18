@@ -285,7 +285,7 @@ jobs:
                   echo '${{ secrets.GOOGLE_CLOUD_CREDENTIALS }}' > credentials.json
 
                   # Crear un nuevo ConfigMap con las credenciales de GCP
-                  kubectl create configmap -n applications-namespace credentials-config --from-file=credentials.json
+                  kubectl create configmap -n applications-namespace credentials-config --from-file=credentials.json || echo "GCP config. already exists."
 
             - name: Deploy blocks coordinator
               working-directory: kubernetes/applications
