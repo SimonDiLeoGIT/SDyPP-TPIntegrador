@@ -31,4 +31,15 @@ pip install -r requirements.txt
 ```sh
 flask --app src/server.py run --host 0.0.0.0
 ```
+4. Enviar transacciones para empezar los procesos:
 
+```sh
+curl -X POST \
+  http://localhost:5001/ \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "sender": "9b22add3e341cbada2c289d6d6e28b70",
+    "receiver": "259a2d1f68fef2c2b38eddd9b4eb2f10",
+    "amount": 5
+  }'
+```
