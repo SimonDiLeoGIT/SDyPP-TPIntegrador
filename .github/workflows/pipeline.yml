@@ -363,7 +363,8 @@ jobs:
                   echo "RABBITMQ_HOST=rabbit.inventomate.xyz" >> minero/.env.prod
                   echo "RABBITMQ_USER=$RABBITMQ_USER" >> minero/.env.prod
                   echo "RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD" >> minero/.env.prod
-
+                  echo "GPU_MAX_RANGE=80000" >> minero/.env.prod
+                  echo "KEEP_ALIVE_INTERVAL=5" >> minero/.env.prod
             - name: Build and push miner service image
               uses: docker/build-push-action@v5
               with:
