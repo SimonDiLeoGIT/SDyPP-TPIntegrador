@@ -294,7 +294,7 @@ jobs:
                   kubectl apply -f blocks-coordinator-service.yml
 
             - name: Deploy pool manager
-              working-directory: kubernetes/aplications
+              working-directory: kubernetes/applications
               run: |
                   kubectl apply -f pool-manager.yml
                   kubectl apply -f pool-manager-service.yml
