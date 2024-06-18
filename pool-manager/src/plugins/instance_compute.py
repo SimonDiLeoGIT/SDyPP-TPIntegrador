@@ -65,7 +65,7 @@ def create_multiple_instances(num_instances: int) -> None:
             instance_resource=config
         )
 
-    print(f"Instances created succesfully")
+    print(f"Instances created succesfully.")
 
 
 def get_active_instance_count() -> int:
