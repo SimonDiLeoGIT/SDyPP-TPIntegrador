@@ -159,7 +159,7 @@ start_cronjob(check_pool_status, CHECK_POOL_STATUS_INTERVAL)
 def status():
     return jsonify({
         "status": "200",
-        "description": "Coordinator proccess is executing..."
+        "description": "Pool manager proccess is executing..."
     })
 
 
