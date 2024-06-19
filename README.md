@@ -46,4 +46,4 @@ Todos los hits de la parte 1 (hits del 1 al 8) se encuentran en la carpeta HITS_
 
 ## Parte 2
 
-El despliegue de esta parte se explica en INSTRUCTIONS.md
+El despliegue de esta parte se explica en INSTRUCTIONS.md.
