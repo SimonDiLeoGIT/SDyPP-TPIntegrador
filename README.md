@@ -36,7 +36,7 @@ La principal ventaja de esta arquitectura es que, si dos operaciones no son mutu
 
 Para lograr esto, se propone utilizar herramientas vistas en la materia como RabbitMQ para el manejo de colas de los bloques a procesar, Redis como motor de base de datos para registrar los bloques y transacciones y CUDA para el cálculo criptográfico intensivo de hashes y resolución de desafíos. Por último, desarrollar un servidor (coordinador) para la comunicación entre todos las tareas.
 
-## Diagrama de arquitectura ([Miro](https://miro.com/welcomeonboard/MUlrYWs0cnBhZjYwRnVtb3pVdk5DTlc5U3VWQjVDTjNiN2pKYmFteFBVdUxaWFA2VlpqRW5ZTnJ6ZkFhRmwzZHwzNDU4NzY0NTg4MjYyMzkxODA4fDI=?share_link_id=446871897508))
+## Diagrama de arquitectura ([Miro](https://miro.com/app/board/uXjVK_AxiMg=/?share_link_id=143461907782))
 
 ![blockchain](https://github.com/SimonDiLeoGIT/SDyPP-TPIntegrador/assets/117539520/250f3333-904c-4b1c-8c07-1c64f9ddb9e9)
 
